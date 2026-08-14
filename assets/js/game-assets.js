@@ -2,6 +2,60 @@
   'use strict';
 
   const ROOT = 'assets/game';
+  const BUILDING_SOURCE_ROOT = `${ROOT}/buildings-source`;
+  const BUILDING_SOURCE = Object.freeze({
+    // Home Village IDs from the in-game village export. Builder Base reuses
+    // several numeric IDs, so this table must stay scoped to obj.buildings.
+    1000000: { dir: 'army/army-camp', prefix: 'Army Camp', max: 14 },
+    1000001: { dir: 'resource/town-hall', max: 18, file: level => `Town Hall${level}${level === 17 ? '-1' : ''}.png` },
+    1000002: { dir: 'resource/elixir-collector', prefix: 'Elixir Collector', max: 17 },
+    1000003: { dir: 'resource/elixir-storage', prefix: 'Elixir Storage', max: 19 },
+    1000004: { dir: 'resource/gold-mine', prefix: 'Gold Mine', max: 17 },
+    1000005: { dir: 'resource/gold-storage', prefix: 'Gold Storage', max: 19 },
+    1000006: { dir: 'army/barracks', prefix: 'Barracks', max: 19 },
+    1000007: { dir: 'army/laboratory', prefix: 'Laboratory', max: 16 },
+    1000008: { dir: 'defensive/cannon', prefix: 'Cannon', max: 21 },
+    1000009: { dir: 'defensive/archer-tower', prefix: 'Archer Tower', max: 21 },
+    1000011: { dir: 'defensive/wizard-tower', prefix: 'Wizard Tower', max: 17 },
+    1000012: { dir: 'defensive/air-defense', prefix: 'Air Defense', max: 16 },
+    1000013: { dir: 'defensive/mortar', prefix: 'Mortar', max: 18 },
+    1000014: { dir: 'resource/clan-castle', prefix: 'Clan Castle', max: 14 },
+    1000015: { dir: 'other/builder-s-hut', file: 'Builders Hut.png' },
+    1000019: { dir: 'defensive/hidden-tesla', prefix: 'Hidden Tesla', max: 17 },
+    1000020: { dir: 'army/spell-factory', prefix: 'Spell Factory', max: 9 },
+    1000021: { dir: 'defensive/x-bow', prefix: 'X-Bow', max: 13, variant: () => ' Ground' },
+    1000023: { dir: 'resource/dark-elixir-drill', prefix: 'Dark Elixir Drill', max: 11 },
+    1000024: { dir: 'resource/dark-elixir-storage', prefix: 'Dark Elixir Storage', max: 13 },
+    1000026: { dir: 'army/dark-barracks', prefix: 'Dark Barracks', max: 13 },
+    1000027: { dir: 'defensive/inferno-tower', prefix: 'Inferno Tower', max: 12, variant: () => ' Single' },
+    1000028: { dir: 'defensive/air-sweeper', prefix: 'Air Sweeper', max: 7 },
+    1000029: { dir: 'army/dark-spell-factory', prefix: 'Dark Spell Factory', max: 8 },
+    1000031: { dir: 'defensive/eagle-artillery', prefix: 'Eagle Artillery', max: 7 },
+    1000032: { dir: 'defensive/bomb-tower', prefix: 'Bomb Tower', max: 13 },
+    1000059: { dir: 'army/workshop', prefix: 'Workshop', max: 9 },
+    1000067: { dir: 'defensive/scattershot', prefix: 'Scattershot', max: 7 },
+    1000068: { dir: 'army/pet-house', prefix: 'Pet House', max: 12 },
+    1000070: {
+      dir: 'army/blacksmith',
+      max: 10,
+      file: level => `Blacksmith${Math.min(9, level % 2 === 0 ? level - 1 : level)}.png`
+    },
+    1000071: { dir: 'army/hero-hall', prefix: 'Hero Hall', max: 12 },
+    1000072: { dir: 'defensive/spell-tower', prefix: 'Spell Tower', max: 4, variant: () => ' Rage' },
+    1000077: { dir: 'defensive/monolith', prefix: 'Monolith', max: 5 },
+    1000079: { dir: 'defensive/multi-gear-tower', prefix: 'Multi-Gear Tower', max: 3, variant: () => ' LongRange' },
+    1000084: { dir: 'defensive/multi-archer-tower', prefix: 'Multi-Archer Tower', max: 4 },
+    1000085: { dir: 'defensive/ricochet-cannon', prefix: 'Ricochet Cannon', max: 4 },
+    1000086: { dir: 'defensive/revenge-tower', max: 2, file: level => `Revenge Tower${level} Dormant.png` },
+    1000089: { dir: 'defensive/firespitter', prefix: 'Firespitter', max: 3 },
+    1000093: { dir: 'other/helper-hut', file: 'Helper Hut.png' },
+    1000097: { dir: 'defensive/crafting-station', file: 'Crafting Station.png' },
+    1000102: {
+      dir: 'defensive/super-wizard-tower',
+      max: 5,
+      file: level => `Super Wizard Tower${level}${level >= 3 ? 'C' : ''}.png`
+    }
+  });
   const cache = new Map();
   const listeners = new Set();
   let loaded = 0;
@@ -47,6 +101,16 @@
     return null;
   }
 
+  function buildingSourceUrl(id, level) {
+    const spec = BUILDING_SOURCE[id];
+    if (!spec) return null;
+    const sourceLevel = Math.min(spec.max || level, Math.max(spec.min || 1, level));
+    const file = typeof spec.file === 'function'
+      ? spec.file(sourceLevel)
+      : spec.file || `${spec.prefix}${sourceLevel}${spec.variant ? spec.variant(sourceLevel) : ''}.png`;
+    return `${BUILDING_SOURCE_ROOT}/${spec.dir}/${file}`;
+  }
+
   const api = {
     building(id, level) {
       const safeId = Number(id);
@@ -54,14 +118,18 @@
 
       if (!Number.isFinite(safeId)) return null;
 
-      return request(
-        `${ROOT}/buildings/${safeId}/level-${safeLevel}.webp`
-      );
+      return request(buildingSourceUrl(safeId, safeLevel));
+    },
+
+    buildingUrl(id, level) {
+      const safeId = Number(id);
+      const safeLevel = Math.max(1, Number(level) || 1);
+      return Number.isFinite(safeId) ? buildingSourceUrl(safeId, safeLevel) : null;
     },
 
     wall(level) {
       return request(
-        `${ROOT}/walls/level-${Math.max(1, Number(level) || 1)}.webp`
+        `${BUILDING_SOURCE_ROOT}/defensive/wall/Wall${Math.min(19, Math.max(1, Number(level) || 1))}.png`
       );
     },
 
@@ -93,8 +161,8 @@
     },
 
     convention: {
-      building: `${ROOT}/buildings/{building-id}/level-{level}.webp`,
-      wall: `${ROOT}/walls/level-{level}.webp`,
+      building: `${BUILDING_SOURCE_ROOT}/{category}/{building}/{name}{level}.png`,
+      wall: `${BUILDING_SOURCE_ROOT}/defensive/wall/Wall{level}.png`,
       scenery: `${ROOT}/scenery/{name}.webp`
     }
   };

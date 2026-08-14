@@ -132,58 +132,75 @@ const EXAMPLE_VILLAGE_JSON = {
   "buildings":[
     {"data":1000001,"lvl":10,"cnt":1},
     {"data":1000010,"lvl":10,"cnt":275},
+    {"data":1000000,"lvl":8,"cnt":4},
+    {"data":1000002,"lvl":13,"cnt":7},
+    {"data":1000003,"lvl":11,"cnt":4},
+    {"data":1000004,"lvl":13,"cnt":7},
+    {"data":1000005,"lvl":11,"cnt":4},
+    {"data":1000006,"lvl":14,"cnt":1},
+    {"data":1000007,"lvl":8,"cnt":1},
     {"data":1000008,"lvl":13,"cnt":5},
     {"data":1000009,"lvl":13,"cnt":7},
-    {"data":1000011,"lvl":8,"cnt":4},
+    {"data":1000011,"lvl":9,"cnt":4},
     {"data":1000012,"lvl":8,"cnt":3},
     {"data":1000013,"lvl":8,"cnt":4},
     {"data":1000014,"lvl":6,"cnt":1},
-    {"data":1000015,"lvl":1,"cnt":4},
-    {"data":1000026,"lvl":7,"cnt":1},
-    {"data":1000027,"lvl":3,"cnt":1},
-    {"data":1000032,"lvl":4,"cnt":2},
-    {"data":1000070,"lvl":3,"cnt":1},
-    {"data":1000071,"lvl":4,"cnt":1},
-    {"data":1000004,"lvl":12,"cnt":7},
-    {"data":1000005,"lvl":11,"cnt":7},
-    {"data":1000006,"lvl":12,"cnt":4},
-    {"data":1000007,"lvl":8,"cnt":4},
-    {"data":1000028,"lvl":5,"cnt":2},
+    {"data":1000015,"lvl":1,"cnt":5},
+    {"data":1000019,"lvl":8,"cnt":4},
+    {"data":1000020,"lvl":5,"cnt":1},
+    {"data":1000021,"lvl":4,"cnt":3},
+    {"data":1000023,"lvl":7,"cnt":3},
+    {"data":1000024,"lvl":6,"cnt":1},
+    {"data":1000026,"lvl":8,"cnt":1},
+    {"data":1000027,"lvl":3,"cnt":2},
+    {"data":1000028,"lvl":6,"cnt":1},
     {"data":1000029,"lvl":5,"cnt":1},
-    {"data":1000003,"lvl":11,"cnt":4}
+    {"data":1000032,"lvl":4,"cnt":2},
+    {"data":1000070,"lvl":3,"cnt":1}
   ]
 };
 const BUILDING_CATALOG = {
+  1000000: {name:'Army Camp', abbr:'AC', w:5, h:5, category:'army', color:'#7ca8b8', priority:36},
   1000001: {name:'Town Hall', abbr:'TH', w:4, h:4, category:'core', color:'#8e7fbf', priority:100},
-  1000016: {name:'Clan Castle', abbr:'CC', w:3, h:3, category:'core', color:'#cf7c94', priority:96},
-  1000071: {name:'Eagle Artillery', abbr:'EA', w:4, h:4, category:'core', color:'#db9f57', priority:95},
-  1000032: {name:'Inferno Tower', abbr:'IT', w:2, h:2, category:'defense', color:'#ff8a65', priority:92},
-  1000070: {name:'X-Bow', abbr:'XB', w:3, h:3, category:'defense', color:'#6ea3ff', priority:90},
+  1000002: {name:'Elixir Collector', abbr:'EC', w:3, h:3, category:'resource', color:'#b276b8', priority:42},
+  1000003: {name:'Elixir Storage', abbr:'ES', w:3, h:3, category:'storage', color:'#db88ee', priority:66},
+  1000004: {name:'Gold Mine', abbr:'GM', w:3, h:3, category:'resource', color:'#baab5d', priority:42},
+  1000005: {name:'Gold Storage', abbr:'GS', w:3, h:3, category:'storage', color:'#f0c76f', priority:66},
+  1000006: {name:'Barracks', abbr:'BR', w:3, h:3, category:'army', color:'#d78b6e', priority:34},
+  1000007: {name:'Laboratory', abbr:'LB', w:4, h:4, category:'support', color:'#7fa9dc', priority:58},
   1000008: {name:'Cannon', abbr:'CN', w:3, h:3, category:'defense', color:'#9ab0bd', priority:72},
   1000009: {name:'Archer Tower', abbr:'AT', w:3, h:3, category:'defense', color:'#8fd3a6', priority:73},
-  1000011: {name:'Mortar', abbr:'MT', w:3, h:3, category:'defense', color:'#b8a1d9', priority:71},
+  1000011: {name:'Wizard Tower', abbr:'WT', w:3, h:3, category:'defense', color:'#c38ee6', priority:74},
   1000012: {name:'Air Defense', abbr:'AD', w:3, h:3, category:'defense', color:'#ffb46a', priority:80},
-  1000013: {name:'Wizard Tower', abbr:'WT', w:3, h:3, category:'defense', color:'#c38ee6', priority:74},
-  1000014: {name:'Air Sweeper', abbr:'AS', w:2, h:2, category:'support', color:'#76d7c4', priority:78},
-  1000015: {name:'Hidden Tesla', abbr:'TS', w:2, h:2, category:'defense', color:'#f7d06c', priority:79},
-  1000026: {name:'Barbarian King', abbr:'BK', w:3, h:3, category:'hero', color:'#ff7c78', priority:85},
-  1000027: {name:'Archer Queen', abbr:'AQ', w:3, h:3, category:'hero', color:'#ff9bc6', priority:85},
-  1000025: {name:'Grand Warden', abbr:'GW', w:3, h:3, category:'hero', color:'#76a5ff', priority:84},
-  1000006: {name:'Gold Storage', abbr:'GS', w:3, h:3, category:'storage', color:'#f0c76f', priority:66},
-  1000007: {name:'Elixir Storage', abbr:'ES', w:3, h:3, category:'storage', color:'#db88ee', priority:66},
-  1000029: {name:'Dark Elixir Storage', abbr:'DS', w:3, h:3, category:'storage', color:'#7d7098', priority:68},
-  1000004: {name:'Gold Mine', abbr:'GM', w:3, h:3, category:'resource', color:'#baab5d', priority:42},
-  1000005: {name:'Elixir Collector', abbr:'EC', w:3, h:3, category:'resource', color:'#b276b8', priority:42},
-  1000028: {name:'Dark Drill', abbr:'DD', w:3, h:3, category:'resource', color:'#7d5d8d', priority:44},
-  1000003: {name:'Army Camp', abbr:'AC', w:5, h:5, category:'army', color:'#7ca8b8', priority:36},
-  1000019: {name:'Barracks', abbr:'BR', w:3, h:3, category:'army', color:'#d78b6e', priority:34},
-  1000020: {name:'Dark Barracks', abbr:'DB', w:3, h:3, category:'army', color:'#9d5f5f', priority:34},
-  1000021: {name:'Laboratory', abbr:'LB', w:4, h:4, category:'support', color:'#7fa9dc', priority:58},
-  1000023: {name:'Spell Factory', abbr:'SF', w:3, h:3, category:'support', color:'#c48e7d', priority:52},
-  1000024: {name:'Dark Spell Factory', abbr:'DF', w:3, h:3, category:'support', color:'#875c7d', priority:52},
-  1000002: {name:'Builder Hut', abbr:'BH', w:2, h:2, category:'outer', color:'#8b6d5c', priority:18},
-  1000093: {name:'Workshop', abbr:'WK', w:3, h:3, category:'support', color:'#7ba3a6', priority:49},
-  1000055: {name:'Gem Mine', abbr:'GMn', w:3, h:3, category:'outer', color:'#aee3ff', priority:15}
+  1000013: {name:'Mortar', abbr:'MT', w:3, h:3, category:'defense', color:'#b8a1d9', priority:71},
+  1000014: {name:'Clan Castle', abbr:'CC', w:3, h:3, category:'core', color:'#cf7c94', priority:96},
+  1000015: {name:'Builder Hut', abbr:'BH', w:2, h:2, category:'outer', color:'#8b6d5c', priority:18},
+  1000019: {name:'Hidden Tesla', abbr:'TS', w:2, h:2, category:'defense', color:'#f7d06c', priority:79},
+  1000020: {name:'Spell Factory', abbr:'SF', w:3, h:3, category:'support', color:'#c48e7d', priority:52},
+  1000021: {name:'X-Bow', abbr:'XB', w:3, h:3, category:'defense', color:'#6ea3ff', priority:90},
+  1000023: {name:'Dark Elixir Drill', abbr:'DD', w:3, h:3, category:'resource', color:'#7d5d8d', priority:44},
+  1000024: {name:'Dark Elixir Storage', abbr:'DS', w:3, h:3, category:'storage', color:'#7d7098', priority:68},
+  1000026: {name:'Dark Barracks', abbr:'DB', w:3, h:3, category:'army', color:'#9d5f5f', priority:34},
+  1000027: {name:'Inferno Tower', abbr:'IT', w:2, h:2, category:'defense', color:'#ff8a65', priority:92},
+  1000028: {name:'Air Sweeper', abbr:'AS', w:2, h:2, category:'support', color:'#76d7c4', priority:78},
+  1000029: {name:'Dark Spell Factory', abbr:'DF', w:3, h:3, category:'support', color:'#875c7d', priority:52},
+  1000031: {name:'Eagle Artillery', abbr:'EA', w:4, h:4, category:'core', color:'#db9f57', priority:95},
+  1000032: {name:'Bomb Tower', abbr:'BT', w:3, h:3, category:'defense', color:'#8d819d', priority:76},
+  1000059: {name:'Workshop', abbr:'WK', w:4, h:4, category:'support', color:'#7ba3a6', priority:49},
+  1000067: {name:'Scattershot', abbr:'SC', w:3, h:3, category:'defense', color:'#c18762', priority:93},
+  1000068: {name:'Pet House', abbr:'PH', w:4, h:4, category:'support', color:'#78a884', priority:55},
+  1000070: {name:'Blacksmith', abbr:'BS', w:3, h:3, category:'support', color:'#9a8170', priority:54},
+  1000071: {name:'Hero Hall', abbr:'HH', w:4, h:4, category:'core', color:'#b7746b', priority:94},
+  1000072: {name:'Spell Tower', abbr:'ST', w:2, h:2, category:'defense', color:'#9c74bd', priority:91},
+  1000077: {name:'Monolith', abbr:'MN', w:3, h:3, category:'defense', color:'#69607c', priority:94},
+  1000079: {name:'Multi-Gear Tower', abbr:'MG', w:3, h:3, category:'defense', color:'#8aa5b8', priority:91},
+  1000084: {name:'Multi-Archer Tower', abbr:'MA', w:3, h:3, category:'defense', color:'#8faf91', priority:92},
+  1000085: {name:'Ricochet Cannon', abbr:'RC', w:3, h:3, category:'defense', color:'#b08f75', priority:92},
+  1000086: {name:'Revenge Tower', abbr:'RT', w:3, h:3, category:'defense', color:'#a87878', priority:93},
+  1000089: {name:'Firespitter', abbr:'FS', w:3, h:3, category:'defense', color:'#d37858', priority:93},
+  1000093: {name:'Helper Hut', abbr:'HP', w:3, h:3, category:'support', color:'#8d9c7b', priority:32},
+  1000097: {name:'Crafting Station', abbr:'CS', w:3, h:3, category:'support', color:'#a98669', priority:45},
+  1000102: {name:'Super Wizard Tower', abbr:'SW', w:3, h:3, category:'defense', color:'#7d75c4', priority:93}
 };
 const CATEGORY_DESIRED_RING = {
   core: 0.18,
@@ -227,20 +244,23 @@ function symmetryNudge(pos,gw,gh,mode,idx){if(mode!=='loose')return pos;let[x,y]
 function canPlace(cells,ox,oy,occupied,gw,gh,gap,margin){for(const c of cells){const x=ox+c.x,y=oy+c.y;if(x<margin||y<margin||x>=gw-margin||y>=gh-margin)return false;for(let dx=-gap;dx<=gap;dx++)for(let dy=-gap;dy<=gap;dy++)if(occupied.has(key(x+dx,y+dy)))return false}return true}
 function placeCells(cells,ox,oy,occupied){const out=[];for(const c of cells){const x=ox+c.x,y=oy+c.y;occupied.add(key(x,y));out.push({x,y})}return out}
 
-function parseVillageExportObject(obj){if(!obj||typeof obj!=='object')throw new Error('JSON tidak valid');if(Array.isArray(obj.walls)&&(obj.wallCount||obj.targetWallCount||obj.townHall||obj.targetTownHall))return{sourceType:'layout JSON',tag:obj.tag||'—',townHall:Number(obj.townHall||obj.targetTownHall||0)||null,wallCount:Number(obj.wallCount||obj.targetWallCount||obj.walls.length)||null,raw:obj};const buildings=Array.isArray(obj.buildings)?obj.buildings:[],th=buildings.find(b=>Number(b.data)===1000001),walls=buildings.filter(b=>Number(b.data)===1000010);const townHall=th?Number(th.lvl||th.level||0):null,wallCount=walls.reduce((s,b)=>s+Number(b.cnt||b.count||0),0);if(!townHall&&!wallCount)throw new Error('Data TH / wall tidak ditemukan');return{sourceType:'village export JSON',tag:obj.tag||obj.playerTag||'—',townHall,wallCount,raw:obj}}
+function exportBuildingId(entry){const value=entry?.data??entry?.id;return value==null||value===''?NaN:Number(value)}
+function exportBuildingLevel(entry){return Math.max(1,Number(entry?.lvl??entry?.level??1)||1)}
+function exportBuildingCount(entry){const value=entry?.cnt??entry?.count;return value==null?1:Math.max(0,Number(value)||0)}
+function parseVillageExportObject(obj){if(!obj||typeof obj!=='object')throw new Error('JSON tidak valid');if(Array.isArray(obj.walls)&&(obj.wallCount||obj.targetWallCount||obj.townHall||obj.targetTownHall))return{sourceType:'layout JSON',tag:obj.tag||obj.playerTag||'—',townHall:Number(obj.townHall||obj.targetTownHall||0)||null,wallCount:Number(obj.wallCount||obj.targetWallCount||obj.walls.length)||null,raw:obj};const buildings=Array.isArray(obj.buildings)?obj.buildings:[],townHall=buildings.filter(b=>exportBuildingId(b)===1000001).reduce((max,b)=>Math.max(max,exportBuildingLevel(b)),0)||null,wallCount=buildings.filter(b=>exportBuildingId(b)===1000010).reduce((sum,b)=>sum+exportBuildingCount(b),0);if(!townHall&&!wallCount)throw new Error('Data TH / wall tidak ditemukan');return{sourceType:'village export JSON',tag:obj.tag||obj.playerTag||'—',townHall,wallCount,raw:obj}}
 function applyParsedVillage(meta){parsedVillage=meta;$('srcTag').textContent=meta.tag||'—';$('srcTH').textContent=meta.townHall??'—';$('srcWall').textContent=meta.wallCount??'—';$('srcStatus').textContent='Parsed';if(meta.townHall)$('targetTH').value=meta.townHall;if(meta.wallCount&&$('useParsedWalls').value==='yes')$('targetWalls').value=meta.wallCount}
 function clearParsedVillage(msg='Belum parse'){parsedVillage=null;$('srcTag').textContent='—';$('srcTH').textContent='—';$('srcWall').textContent='—';$('srcStatus').textContent=msg}
 
 function generateWalls(seedStr){const rng=mulberry32(hashSeed(seedStr+'|walls|'+layoutRoll)());const gw=HOME_VILLAGE_GRID_SIZE,gh=HOME_VILLAGE_GRID_SIZE,targetTH=+$('targetTH').value||10,parsedWall=parsedVillage?.wallCount||null,useParsed=$('useParsedWalls').value==='yes',target=(useParsed&&parsedWall)?parsedWall:(+$('targetWalls').value||275),gap=+$('minGap').value||1,margin=+$('margin').value||1,jitter=+$('jitter').value||4,symmetry=$('symmetry').value;$('gridW').value=gw;$('gridH').value=gh;if(useParsed&&parsedWall)$('targetWalls').value=parsedWall;const chosen=chooseComponentsForTarget(referenceComponents,target),selected=chosen.components,transforms=allTransformModes(),anchors=shuffle(anchorLibrary(gw,gh),rng),occupied=new Set(),placements=[];let anchorIndex=0;for(const[ idx,comp]of selected.slice().sort((a,b)=>b.size-a.size).entries()){let best=null;const modes=shuffle(transforms,rng);for(let pass=0;pass<260;pass++){const mode=modes[pass%modes.length],tcells=transformCells(comp.cells,mode),box=bbox(tcells);let anchor=anchors[anchorIndex%anchors.length];if(pass>70)anchor=anchors[(anchorIndex+pass)%anchors.length];anchor=symmetryNudge(anchor,gw,gh,symmetry,idx);const ox=Math.round(anchor[0]-box.w/2+randInt(rng,-jitter,jitter)),oy=Math.round(anchor[1]-box.h/2+randInt(rng,-jitter,jitter));if(!canPlace(tcells,ox,oy,occupied,gw,gh,gap,margin))continue;const score=Math.abs(ox+box.w/2-gw/2)*.45+Math.abs(oy+box.h/2-gh/2)*.45+rng()*2;if(!best||score<best.score){best={tcells,box,ox,oy,score,mode};if(pass>30)break}}if(!best){for(let pass=0;pass<400;pass++){const mode=transforms[pass%transforms.length],tcells=transformCells(comp.cells,mode),box=bbox(tcells),ox=randInt(rng,margin,Math.max(margin,gw-box.w-margin)),oy=randInt(rng,margin,Math.max(margin,gh-box.h-margin));if(canPlace(tcells,ox,oy,occupied,gw,gh,Math.max(0,gap-1),margin)){best={tcells,box,ox,oy,mode};break}}}if(best){const cells=placeCells(best.tcells,best.ox,best.oy,occupied);placements.push({sourceComponentId:comp.id,size:comp.size,transform:best.mode,origin:{x:best.ox,y:best.oy},cells,box:best.box});anchorIndex++}}
 const walls=placements.flatMap(p=>p.cells).sort((a,b)=>a.y-b.y||a.x-b.x);return{type:'village-layout-studio-v3',seed:seedStr,targetTownHall:targetTH,grid:{width:gw,height:gh},sourceVillage:parsedVillage?{tag:parsedVillage.tag,townHall:parsedVillage.townHall,wallCount:parsedVillage.wallCount}:null,targetWallCount:target,generatedWallCount:walls.length,placements,walls,buildings:[]}}
 
-function fallbackCatalog(id){return{name:'Building '+id,abbr:'B',w:3,h:3,category:'support',color:'#8b7587',priority:35}}
-function getBuildingInventory(meta,targetTH){const raw=Array.isArray(meta?.raw?.buildings)?meta.raw.buildings:[],density=$('buildingDensity').value,inv=[];if(raw.length){for(const entry of raw){const id=Number(entry.data),count=Number(entry.cnt||entry.count||1);if(!count||id===1000010)continue;const cat=BUILDING_CATALOG[id]||fallbackCatalog(id);let n=count;if(density==='core'&&!['core','defense','hero','support','storage'].includes(cat.category))n=Math.ceil(count*.35);if(density==='light')n=Math.max(1,Math.ceil(count*.55));for(let i=0;i<n;i++)inv.push({id,level:Number(entry.lvl||entry.level||1),...cat})}}else{for(const p of [{id:1000001,count:1},{id:1000032,count:2},{id:1000070,count:2},{id:1000012,count:4},{id:1000013,count:4},{id:1000008,count:6},{id:1000009,count:6},{id:1000011,count:4},{id:1000006,count:4},{id:1000007,count:4},{id:1000004,count:6},{id:1000005,count:6},{id:1000003,count:4},{id:1000002,count:5}]){const cat=BUILDING_CATALOG[p.id]||fallbackCatalog(p.id);for(let i=0;i<p.count;i++)inv.push({id:p.id,level:targetTH,...cat})}}inv.sort((a,b)=>b.priority-a.priority||(b.w*b.h)-(a.w*a.h));return inv}
+function fallbackCatalog(id){return{name:`Unknown ${id}`,abbr:'?',w:3,h:3,category:'support',color:'#8b7587',priority:35}}
+function getBuildingInventory(meta,targetTH){const raw=Array.isArray(meta?.raw?.buildings)?meta.raw.buildings:[],density=$('buildingDensity').value,inv=[];if(raw.length){for(const entry of raw){const id=exportBuildingId(entry),count=exportBuildingCount(entry);if(!Number.isFinite(id)||!count||id===1000010)continue;const cat=BUILDING_CATALOG[id]||fallbackCatalog(id);let n=count;if(density==='core'&&!['core','defense','hero','support','storage'].includes(cat.category))n=Math.ceil(count*.35);if(density==='light')n=Math.max(1,Math.ceil(count*.55));for(let i=0;i<n;i++)inv.push({id,level:exportBuildingLevel(entry),...cat})}}else{for(const p of [{id:1000001,count:1},{id:1000027,count:2},{id:1000021,count:2},{id:1000012,count:4},{id:1000011,count:4},{id:1000008,count:6},{id:1000009,count:6},{id:1000013,count:4},{id:1000005,count:4},{id:1000003,count:4},{id:1000004,count:6},{id:1000002,count:6},{id:1000000,count:4},{id:1000015,count:5}]){const cat=BUILDING_CATALOG[p.id]||fallbackCatalog(p.id);for(let i=0;i<p.count;i++)inv.push({id:p.id,level:targetTH,...cat})}}inv.sort((a,b)=>b.priority-a.priority||(b.w*b.h)-(a.w*a.h));return inv}
 function buildOccupied(walls,buildings=[],skipIndex=-1){const occ=new Set();for(const w of walls||[])occ.add(key(w.x,w.y));buildings.forEach((b,i)=>{if(i===skipIndex)return;for(let dx=0;dx<b.w;dx++)for(let dy=0;dy<b.h;dy++)occ.add(key(b.x+dx,b.y+dy))});return occ}
 function footprintFits(x,y,w,h,gw,gh,occupied){if(x<0||y<0||x+w>gw||y+h>gh)return false;for(let dx=0;dx<w;dx++)for(let dy=0;dy<h;dy++)if(occupied.has(key(x+dx,y+dy)))return false;return true}
 function countAdjacentWalls(x,y,w,h,wallSet){let c=0;for(let dx=-1;dx<=w;dx++){if(wallSet.has(key(x+dx,y-1)))c++;if(wallSet.has(key(x+dx,y+h)))c++}for(let dy=0;dy<h;dy++){if(wallSet.has(key(x-1,y+dy)))c++;if(wallSet.has(key(x+w,y+dy)))c++}return c}
 function placeOneBuilding(b,gw,gh,occupied,wallSet,rng){const desired=CATEGORY_DESIRED_RING[b.category]??.55,cx=gw/2,cy=gh/2,maxD=Math.hypot(cx,cy);let best=null;for(let y=0;y<=gh-b.h;y++)for(let x=0;x<=gw-b.w;x++){if(!footprintFits(x,y,b.w,b.h,gw,gh,occupied))continue;const ring=Math.hypot(x+b.w/2-cx,y+b.h/2-cy)/maxD,adj=countAdjacentWalls(x,y,b.w,b.h,wallSet),score=Math.abs(ring-desired)*8-adj*(['core','defense','hero','storage'].includes(b.category)?.24:.05)+rng()*.35;if(!best||score<best.score)best={x,y,score}}if(!best)return null;for(let dx=0;dx<b.w;dx++)for(let dy=0;dy<b.h;dy++)occupied.add(key(best.x+dx,best.y+dy));return{...b,x:best.x,y:best.y}}
-function generateBuildingsForCurrent(){if(!current||!current.walls?.length)return;buildingRoll++;const seed=$('seed').value.trim()||'YUSHIKA-LAYOUT-STUDIO',rng=mulberry32(hashSeed(seed+'|buildings|'+buildingRoll)()),inventory=getBuildingInventory(parsedVillage||{raw:{}},current.targetTownHall),wallSet=new Set(current.walls.map(w=>key(w.x,w.y))),occupied=buildOccupied(current.walls,[]),placed=[];for(const item of inventory){const p=placeOneBuilding(item,current.grid.width,current.grid.height,occupied,wallSet,rng);if(p)placed.push(p)}current.buildings=placed;current.buildingRoll=buildingRoll;current.buildingSeed=seed+'|buildings|'+buildingRoll}
+function generateBuildingsForCurrent(){if(!current||!current.walls?.length)return;buildingRoll++;const seed=$('seed').value.trim()||'YUSHIKA-LAYOUT-STUDIO',rng=mulberry32(hashSeed(seed+'|buildings|'+buildingRoll)()),inventory=getBuildingInventory(parsedVillage||{raw:{}},current.targetTownHall),wallSet=new Set(current.walls.map(w=>key(w.x,w.y))),occupied=buildOccupied(current.walls,[]),placed=[],unplaced=[];for(const item of inventory){const p=placeOneBuilding(item,current.grid.width,current.grid.height,occupied,wallSet,rng);if(p)placed.push(p);else unplaced.push(item)}current.buildings=placed;current.sourceBuildingCount=inventory.length;current.unplacedBuildings=unplaced;current.buildingRoll=buildingRoll;current.buildingSeed=seed+'|buildings|'+buildingRoll}
 
 function getModuleColor(i){const colors=['#D7A8B6','#B88698','#A47BA7','#8FA8C9','#D5A56E','#8EBFAC','#C897D6'];return colors[i%colors.length]}
 function renderModuleList(){const box=$('moduleList');box.innerHTML='';if(!current?.placements?.length){box.innerHTML='<div class="listItem small">Belum ada module.</div>';return}current.placements.forEach((p,i)=>{const d=document.createElement('div');d.className='listItem';d.innerHTML=`<div style="display:flex;justify-content:space-between"><b>Module ${i+1}</b><span class="legendChip"><span class="dot" style="background:${getModuleColor(i)}"></span>${p.size} wall</span></div><div class="small mono">origin (${p.origin.x}, ${p.origin.y}) • rot ${p.transform.rot*90}°</div>`;box.appendChild(d)})}
@@ -413,15 +433,29 @@ function drawMappedGrid(m){
   for(let y=0;y<=m.gh;y++){const major=y%5===0,color=major?'rgba(255,225,155,.34)':'rgba(255,255,255,.19)';line(isoPoint(m,0,y),isoPoint(m,m.gw,y),color,major?1.15:.65)}
   ctx.strokeStyle='rgba(255,235,177,.86)';ctx.lineWidth=2*scale;ctx.beginPath();ctx.moveTo(m.corners.top.x,m.corners.top.y);ctx.lineTo(m.corners.right.x,m.corners.right.y);ctx.lineTo(m.corners.bottom.x,m.corners.bottom.y);ctx.lineTo(m.corners.left.x,m.corners.left.y);ctx.closePath();ctx.stroke();ctx.restore()
 }
-function villageWallLevel(){const walls=parsedVillage?.raw?.buildings?.filter(b=>Number(b.data)===1000010)||[];return walls.reduce((max,w)=>Math.max(max,Number(w.lvl||w.level||1)),1)}
+function villageWallLevel(){const walls=parsedVillage?.raw?.buildings?.filter(b=>exportBuildingId(b)===1000010)||[];return walls.reduce((max,w)=>Math.max(max,exportBuildingLevel(w)),1)}
 function drawHomeVillageFallback(W,H){const sky=ctx.createLinearGradient(0,0,0,H);sky.addColorStop(0,'#5cc7ef');sky.addColorStop(.48,'#95dff0');sky.addColorStop(.49,'#3a88a7');sky.addColorStop(1,'#164f6c');ctx.fillStyle=sky;ctx.fillRect(0,0,W,H);ctx.fillStyle='rgba(255,255,255,.22)';for(let i=0;i<9;i++){ctx.beginPath();ctx.arc(70+i*157,90+(i%3)*36,35+(i%2)*22,0,Math.PI*2);ctx.fill()}ctx.fillStyle='#2f6d32';ctx.beginPath();ctx.moveTo(W/2,70);ctx.lineTo(W-70,H/2);ctx.lineTo(W/2,H-28);ctx.lineTo(70,H/2);ctx.closePath();ctx.fill();ctx.strokeStyle='#174b27';ctx.lineWidth=22;ctx.stroke();ctx.strokeStyle='#72b94b';ctx.lineWidth=13;ctx.stroke()}
 function drawContainedImage(img,W,H){const scale=Math.min(W/img.naturalWidth,H/img.naturalHeight),w=img.naturalWidth*scale,h=img.naturalHeight*scale,x=(W-w)/2,y=(H-h)/2;ctx.drawImage(img,x,y,w,h);return{x,y,w,h}}
 function drawImageAtFrame(img,frame){ctx.drawImage(img,frame.x,frame.y,frame.w,frame.h);return{x:frame.x,y:frame.y,w:frame.w,h:frame.h}}
 function drawCalibratedImage(img,W,H,grid){const info=window.GameAssetPack?.sceneryInfo(FIXED_SCENERY_ID);if(info?.file){canvas.style.backgroundImage=`url("assets/game/scenery/${encodeURI(info.file)}")`;canvas.style.backgroundSize='100% 100%';canvas.style.backgroundPosition='0 0';canvas.style.backgroundRepeat='no-repeat'}return{x:0,y:0,w:W,h:H}}
 function drawSceneryBackground(){const W=canvas.width,H=canvas.height,kind=FIXED_SCENERY_ID,grid=effectiveGridForSelectedScenery();sceneryFrame=null;canvas.style.backgroundColor='#102c3a';const info=window.GameAssetPack?.sceneryInfo(kind),image=window.GameAssetPack?.scenery(kind);if(info){const frame=drawCalibratedImage(image,W,H,grid);sceneryFrame={...frame,grid};return}canvas.style.backgroundImage='none';ctx.fillStyle='#102c3a';ctx.fillRect(0,0,W,H);drawHomeVillageFallback(W,H)}
-function drawIsoWall(w,m){drawIsoTile(m,w.x,w.y,'#d2c5cd',.92,'rgba(255,255,255,.12)')}
-function drawIsoBuilding(b,m){for(let dy=0;dy<b.h;dy++)for(let dx=0;dx<b.w;dx++)drawIsoTile(m,b.x+dx,b.y+dy,b.color,.95,'rgba(255,255,255,.11)');const c=isoPoint(m,b.x+b.w/2,b.y+b.h/2),scale=m.renderScale||1,logicalTileW=m.tw/scale,logicalFontSize=Math.max(5.5,Math.min(7.25,logicalTileW*.95)),fontSize=logicalFontSize*scale;ctx.save();ctx.font=`800 ${fontSize}px Inter, sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineJoin='round';ctx.lineWidth=1.6*scale;ctx.strokeStyle='rgba(29,12,24,.76)';ctx.strokeText(b.abbr,c.x,c.y-scale*.5);ctx.fillStyle='#fff7f8';ctx.fillText(b.abbr,c.x,c.y-scale*.5);ctx.restore()}
-function drawGeneratedScenery(m){const walls=(current?.walls||[]).slice().sort((a,b)=>{const pa=isoPoint(m,a.x+1,a.y+1),pb=isoPoint(m,b.x+1,b.y+1);return pa.y-pb.y||pa.x-pb.x});for(const wall of walls)drawIsoWall(wall,m);const buildings=(current?.buildings||[]).slice().sort((a,b)=>{const pa=isoPoint(m,a.x+a.w,a.y+a.h),pb=isoPoint(m,b.x+b.w,b.y+b.h);return pa.y-pb.y||pa.x-pb.x});for(const building of buildings)drawIsoBuilding(building,m)}
+const BUILDING_SPRITE_STYLE={
+  1000000:{scale:.86,anchor:.49},
+  1000001:{scale:.94,anchor:.49},
+  1000007:{scale:.90,anchor:.49},
+  1000014:{scale:.90,anchor:.49},
+  1000031:{scale:.94,anchor:.49},
+  1000059:{scale:.88,anchor:.49},
+  1000068:{scale:.88,anchor:.49},
+  1000071:{scale:.92,anchor:.49}
+};
+function drawIsoWallBase(w,m,alpha=.2){drawIsoTile(m,w.x,w.y,'#d2c5cd',alpha,'rgba(255,255,255,.08)')}
+function drawIsoBuildingBase(b,m,alpha=.17){for(let dy=0;dy<b.h;dy++)for(let dx=0;dx<b.w;dx++)drawIsoTile(m,b.x+dx,b.y+dy,b.color,alpha,'rgba(255,255,255,.07)')}
+function drawAnchoredSprite(image,centerX,baseY,width){const height=width*image.naturalHeight/image.naturalWidth;ctx.drawImage(image,centerX-width/2,baseY-height,width,height)}
+function drawIsoWallSprite(w,m,image){const c=isoPoint(m,w.x+.5,w.y+.5),width=m.tw*.84,baseY=c.y+m.th*.48;drawAnchoredSprite(image,c.x,baseY,width)}
+function drawIsoBuildingSprite(b,m,image){const style=BUILDING_SPRITE_STYLE[b.id]||{},footprint=Math.max(b.w,b.h),width=footprint*m.tw*(style.scale||.88),c=isoPoint(m,b.x+b.w/2,b.y+b.h/2),baseY=c.y+footprint*m.th*(style.anchor||.49);drawAnchoredSprite(image,c.x,baseY,width)}
+function drawIsoBuildingFallback(b,m){drawIsoBuildingBase(b,m,.72);const c=isoPoint(m,b.x+b.w/2,b.y+b.h/2),scale=m.renderScale||1,logicalTileW=m.tw/scale,fontSize=Math.max(4,Math.min(5.5,logicalTileW*.72))*scale;ctx.save();ctx.font=`800 ${fontSize}px Inter, sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineJoin='round';ctx.lineWidth=1.3*scale;ctx.strokeStyle='rgba(29,12,24,.76)';ctx.strokeText(b.abbr,c.x,c.y-scale*.5);ctx.fillStyle='#fff7f8';ctx.fillText(b.abbr,c.x,c.y-scale*.5);ctx.restore()}
+function drawGeneratedScenery(m){const walls=current?.walls||[],buildings=current?.buildings||[],wallSprite=window.GameAssetPack?.wall(villageWallLevel()),queue=[];for(const wall of walls){const p=isoPoint(m,wall.x+1,wall.y+1);queue.push({kind:'wall',value:wall,image:wallSprite,depthY:p.y,depthX:p.x})}for(const building of buildings){const p=isoPoint(m,building.x+building.w,building.y+building.h),image=window.GameAssetPack?.building(building.id,building.level);queue.push({kind:'building',value:building,image,depthY:p.y,depthX:p.x})}queue.sort((a,b)=>a.depthY-b.depthY||a.depthX-b.depthX);for(const item of queue){if(item.kind==='wall'){if(item.image)drawIsoWallSprite(item.value,m,item.image);else drawIsoWallBase(item.value,m,.85)}else if(item.image)drawIsoBuildingSprite(item.value,m,item.image);else drawIsoBuildingFallback(item.value,m)}}
 function drawScenery(){ctx.clearRect(0,0,canvas.width,canvas.height);drawSceneryBackground();const m=isoMetrics();if(showGrid)drawMappedGrid(m);drawGeneratedScenery(m)}
 function drawIsoGhost(ds,m){const b=current.buildings[ds.index],c=ds.candidate;for(let dx=0;dx<b.w;dx++)for(let dy=0;dy<b.h;dy++)drawIsoTile(m,c.x+dx,c.y+dy,ds.valid?'#8dc9a8':'#df7586',.55)}
 function drawCanvas(){ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';if(previewMode==='master')drawMaster();else drawScenery()}
@@ -442,7 +476,7 @@ canvas.addEventListener('pointerdown',e=>{if(!current)return;const p=canvasPoint
 canvas.addEventListener('pointerup',e=>{if(calibrationState){calibrationState.interaction=null;canvas.releasePointerCapture?.(e.pointerId);canvas.style.cursor=calibrationState.hoverMode==='move'?'grab':calibrationState.hoverMode==='scale'?'nwse-resize':'default';drawCanvas();return}if(!dragState)return;const b=current.buildings[dragState.index];if(dragState.valid&&dragState.candidate){b.x=dragState.candidate.x;b.y=dragState.candidate.y}dragState=null;$('dragGhost').style.display='none';updateOutput();render()});
 canvas.addEventListener('pointercancel',()=>{if(calibrationState){calibrationState.interaction=null;calibrationState.hoverMode=null;canvas.style.cursor='default';drawCanvas();return}dragState=null;$('dragGhost').style.display='none';drawCanvas()});
 
-function updateSummary(){if(!current){$('pillSummary').textContent='Belum generate';$('pillWall').textContent='Wall: —';$('pillBuildings').textContent='Buildings: —';$('placedBuildingsStat').textContent='—';return}$('pillSummary').textContent=`TH${current.targetTownHall} • ${previewMode==='master'?'Master Plan':'Scenery'}`;$('pillWall').textContent=`Wall: ${current.generatedWallCount}/${current.targetWallCount}${current.generatedWallCount!==current.targetWallCount?' • closest':''}`;$('pillBuildings').textContent=`Buildings: ${current.buildings?.length||0}`;$('placedBuildingsStat').textContent=current.buildings?.length||0;updateOutput()}
+function updateSummary(){if(!current){$('pillSummary').textContent='Belum generate';$('pillWall').textContent='Wall: —';$('pillBuildings').textContent='Buildings: —';$('placedBuildingsStat').textContent='—';return}const placed=current.buildings?.length||0,total=current.sourceBuildingCount??placed;$('pillSummary').textContent=`TH${current.targetTownHall} • ${previewMode==='master'?'Master Plan':'Scenery'}`;$('pillWall').textContent=`Wall: ${current.generatedWallCount}/${current.targetWallCount}${current.generatedWallCount!==current.targetWallCount?' • closest':''}`;$('pillBuildings').textContent=`Buildings: ${placed}/${total}`;$('placedBuildingsStat').textContent=placed===total?placed:`${placed}/${total}`;updateOutput()}
 function updateOutput(){$('jsonOut').value=current?JSON.stringify(current,null,2):''}
 function populateSceneryOptions(){const select=$('scenerySelect'),item=(window.SCENERY_CATALOG||[]).find(entry=>entry.id===FIXED_SCENERY_ID);select.innerHTML='';const option=document.createElement('option');option.value=FIXED_SCENERY_ID;option.textContent=item?.name||'Skeleton Kingdom';select.appendChild(option);select.value=FIXED_SCENERY_ID}
 function syncCanvasDimensions(){
