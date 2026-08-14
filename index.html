@@ -41,7 +41,9 @@ button{border:0;border-radius:12px;padding:9px 11px;color:white;font-weight:800;
 .segment{display:flex;gap:3px;padding:3px;border-radius:13px;background:rgba(250,220,213,.055);border:1px solid rgba(250,220,213,.08)}.segment button{box-shadow:none;background:transparent;padding:7px 11px;color:var(--muted)}.segment button.active{background:linear-gradient(135deg,var(--mauve),var(--berry));color:white}.spacer{flex:1}
 .zoomReadout{display:flex;align-items:center;gap:7px;padding:0 4px;color:var(--muted);font-size:10px}.zoomText{min-width:42px;text-align:right;font-size:11px;color:var(--text);font-weight:800}
 .previewStage{min-height:0;border-radius:0;background:#102c3a;border:0;box-shadow:none;overflow:hidden;position:relative}
-.viewport{position:absolute;inset:0;overflow:auto;padding:0;overscroll-behavior:contain;scrollbar-gutter:stable}
+.viewport{position:absolute;inset:0;overflow:auto;padding:0;overscroll-behavior:contain;scrollbar-width:none;cursor:grab;touch-action:none;user-select:none}
+.viewport::-webkit-scrollbar{display:none}
+.viewport.isPanning,.viewport.isPanning canvas{cursor:grabbing!important}
 .canvasWrap{min-width:100%;min-height:100%;display:block;background:#102c3a}
 .canvasWrap canvas{display:block;margin:0;border:0;border-radius:0;box-shadow:none;background:#120a12;transform-origin:0 0;touch-action:none;max-width:none}
 .stageHint{position:absolute;left:20px;bottom:18px;padding:8px 10px;border-radius:12px;background:rgba(18,8,16,.78);backdrop-filter:blur(10px);border:1px solid var(--line);font-size:10px;color:var(--muted);pointer-events:none}.stageHint b{color:var(--text)}
@@ -73,7 +75,7 @@ button{border:0;border-radius:12px;padding:9px 11px;color:white;font-weight:800;
     <div class="card">
       <div class="cardHead"><h2>Generator</h2><span>layout settings</span></div>
       <label>Seed</label><input id="seed" type="text" value="YUSHIKA-LAYOUT-STUDIO">
-      <div class="grid2"><div><label>Grid W</label><input id="gridW" type="number" value="44" min="20" max="60"></div><div><label>Grid H</label><input id="gridH" type="number" value="44" min="20" max="60"></div></div>
+      <div class="grid2"><div><label>Grid W</label><input id="gridW" type="number" value="44" min="44" max="44" readonly></div><div><label>Grid H</label><input id="gridH" type="number" value="44" min="44" max="44" readonly></div></div>
       <div class="grid2"><div><label>Target TH</label><input id="targetTH" type="number" value="10" min="1" max="17"></div><div><label>Wall count</label><input id="targetWalls" type="number" value="275" min="20" max="500"></div></div>
       <div class="grid2"><div><label>Min gap wall</label><input id="minGap" type="number" value="1" min="0" max="4"></div><div><label>Outer margin</label><input id="margin" type="number" value="1" min="0" max="6"></div></div>
       <div class="grid2"><div><label>Jitter</label><input id="jitter" type="number" value="4" min="0" max="12"></div><div><label>Balance</label><select id="symmetry"><option value="none">Free</option><option value="loose" selected>Balanced</option></select></div></div>
@@ -114,7 +116,7 @@ button{border:0;border-radius:12px;padding:9px 11px;color:white;font-weight:800;
 
     <section class="previewStage" id="previewStage">
       <div class="viewport" id="viewport"><div class="canvasWrap"><canvas id="previewCanvas" width="1280" height="900"></canvas></div></div>
-      <div class="stageHint" id="stageHint"><b>Skeleton Kingdom:</b> grid buildable 44×44 • wheel untuk zoom • double click untuk reset zoom</div>
+      <div class="stageHint" id="stageHint"><b>Skeleton Kingdom:</b> grid buildable 44×44 • wheel untuk zoom • klik-tahan lalu geser untuk memindahkan view</div>
       <div id="dragGhost" class="dragGhost"></div>
     </section>
   </main>
@@ -197,7 +199,8 @@ const SAKURA_BG = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wCEAAQGBg
 
 const $=id=>document.getElementById(id); const canvas=$('previewCanvas'); const ctx=canvas.getContext('2d');
 const FIXED_SCENERY_ID='skeleton-kingdom';
-const SKELETON_KINGDOM_GRID={top:[.500302,.221765],right:[.648208,.425235],bottom:[.500201,.628559],left:[.352691,.423]};
+const HOME_VILLAGE_GRID_SIZE=44;
+const SKELETON_KINGDOM_GRID={top:[.50031327,.25266061],right:[.62441881,.42490589],bottom:[.50041759,.59747215],left:[.37642174,.42530011]};
 let current=null, referenceComponents=[], parsedVillage=null; let previewMode='scenery'; let zoom=1; let showGrid=true; let buildingRoll=0; let layoutRoll=0; let customScenery=null; let customSceneryKey='custom';
 let hoverState=null; let dragState=null; let sceneryImage=null; let sceneryReady=false; let sceneryFrame=null;
 
@@ -226,7 +229,7 @@ function parseVillageExportObject(obj){if(!obj||typeof obj!=='object')throw new 
 function applyParsedVillage(meta){parsedVillage=meta;$('srcTag').textContent=meta.tag||'—';$('srcTH').textContent=meta.townHall??'—';$('srcWall').textContent=meta.wallCount??'—';$('srcStatus').textContent='Parsed';if(meta.townHall)$('targetTH').value=meta.townHall;if(meta.wallCount&&$('useParsedWalls').value==='yes')$('targetWalls').value=meta.wallCount}
 function clearParsedVillage(msg='Belum parse'){parsedVillage=null;$('srcTag').textContent='—';$('srcTH').textContent='—';$('srcWall').textContent='—';$('srcStatus').textContent=msg}
 
-function generateWalls(seedStr){const rng=mulberry32(hashSeed(seedStr+'|walls|'+layoutRoll)());const gw=+$('gridW').value||44,gh=+$('gridH').value||44,targetTH=+$('targetTH').value||10,parsedWall=parsedVillage?.wallCount||null,useParsed=$('useParsedWalls').value==='yes',target=(useParsed&&parsedWall)?parsedWall:(+$('targetWalls').value||275),gap=+$('minGap').value||1,margin=+$('margin').value||1,jitter=+$('jitter').value||4,symmetry=$('symmetry').value;if(useParsed&&parsedWall)$('targetWalls').value=parsedWall;const chosen=chooseComponentsForTarget(referenceComponents,target),selected=chosen.components,transforms=allTransformModes(),anchors=shuffle(anchorLibrary(gw,gh),rng),occupied=new Set(),placements=[];let anchorIndex=0;for(const[ idx,comp]of selected.slice().sort((a,b)=>b.size-a.size).entries()){let best=null;const modes=shuffle(transforms,rng);for(let pass=0;pass<260;pass++){const mode=modes[pass%modes.length],tcells=transformCells(comp.cells,mode),box=bbox(tcells);let anchor=anchors[anchorIndex%anchors.length];if(pass>70)anchor=anchors[(anchorIndex+pass)%anchors.length];anchor=symmetryNudge(anchor,gw,gh,symmetry,idx);const ox=Math.round(anchor[0]-box.w/2+randInt(rng,-jitter,jitter)),oy=Math.round(anchor[1]-box.h/2+randInt(rng,-jitter,jitter));if(!canPlace(tcells,ox,oy,occupied,gw,gh,gap,margin))continue;const score=Math.abs(ox+box.w/2-gw/2)*.45+Math.abs(oy+box.h/2-gh/2)*.45+rng()*2;if(!best||score<best.score){best={tcells,box,ox,oy,score,mode};if(pass>30)break}}if(!best){for(let pass=0;pass<400;pass++){const mode=transforms[pass%transforms.length],tcells=transformCells(comp.cells,mode),box=bbox(tcells),ox=randInt(rng,margin,Math.max(margin,gw-box.w-margin)),oy=randInt(rng,margin,Math.max(margin,gh-box.h-margin));if(canPlace(tcells,ox,oy,occupied,gw,gh,Math.max(0,gap-1),margin)){best={tcells,box,ox,oy,mode};break}}}if(best){const cells=placeCells(best.tcells,best.ox,best.oy,occupied);placements.push({sourceComponentId:comp.id,size:comp.size,transform:best.mode,origin:{x:best.ox,y:best.oy},cells,box:best.box});anchorIndex++}}
+function generateWalls(seedStr){const rng=mulberry32(hashSeed(seedStr+'|walls|'+layoutRoll)());const gw=HOME_VILLAGE_GRID_SIZE,gh=HOME_VILLAGE_GRID_SIZE,targetTH=+$('targetTH').value||10,parsedWall=parsedVillage?.wallCount||null,useParsed=$('useParsedWalls').value==='yes',target=(useParsed&&parsedWall)?parsedWall:(+$('targetWalls').value||275),gap=+$('minGap').value||1,margin=+$('margin').value||1,jitter=+$('jitter').value||4,symmetry=$('symmetry').value;$('gridW').value=gw;$('gridH').value=gh;if(useParsed&&parsedWall)$('targetWalls').value=parsedWall;const chosen=chooseComponentsForTarget(referenceComponents,target),selected=chosen.components,transforms=allTransformModes(),anchors=shuffle(anchorLibrary(gw,gh),rng),occupied=new Set(),placements=[];let anchorIndex=0;for(const[ idx,comp]of selected.slice().sort((a,b)=>b.size-a.size).entries()){let best=null;const modes=shuffle(transforms,rng);for(let pass=0;pass<260;pass++){const mode=modes[pass%modes.length],tcells=transformCells(comp.cells,mode),box=bbox(tcells);let anchor=anchors[anchorIndex%anchors.length];if(pass>70)anchor=anchors[(anchorIndex+pass)%anchors.length];anchor=symmetryNudge(anchor,gw,gh,symmetry,idx);const ox=Math.round(anchor[0]-box.w/2+randInt(rng,-jitter,jitter)),oy=Math.round(anchor[1]-box.h/2+randInt(rng,-jitter,jitter));if(!canPlace(tcells,ox,oy,occupied,gw,gh,gap,margin))continue;const score=Math.abs(ox+box.w/2-gw/2)*.45+Math.abs(oy+box.h/2-gh/2)*.45+rng()*2;if(!best||score<best.score){best={tcells,box,ox,oy,score,mode};if(pass>30)break}}if(!best){for(let pass=0;pass<400;pass++){const mode=transforms[pass%transforms.length],tcells=transformCells(comp.cells,mode),box=bbox(tcells),ox=randInt(rng,margin,Math.max(margin,gw-box.w-margin)),oy=randInt(rng,margin,Math.max(margin,gh-box.h-margin));if(canPlace(tcells,ox,oy,occupied,gw,gh,Math.max(0,gap-1),margin)){best={tcells,box,ox,oy,mode};break}}}if(best){const cells=placeCells(best.tcells,best.ox,best.oy,occupied);placements.push({sourceComponentId:comp.id,size:comp.size,transform:best.mode,origin:{x:best.ox,y:best.oy},cells,box:best.box});anchorIndex++}}
 const walls=placements.flatMap(p=>p.cells).sort((a,b)=>a.y-b.y||a.x-b.x);return{type:'village-layout-studio-v3',seed:seedStr,targetTownHall:targetTH,grid:{width:gw,height:gh},sourceVillage:parsedVillage?{tag:parsedVillage.tag,townHall:parsedVillage.townHall,wallCount:parsedVillage.wallCount}:null,targetWallCount:target,generatedWallCount:walls.length,placements,walls,buildings:[]}}
 
 function fallbackCatalog(id){return{name:'Building '+id,abbr:'B',w:3,h:3,category:'support',color:'#8b7587',priority:35}}
@@ -246,8 +249,9 @@ function calValidGrid(grid){return!!grid&&CALIBRATION_CORNERS.every(k=>Array.isA
 function loadCalibrationMap(){try{const raw=JSON.parse(localStorage.getItem(CALIBRATION_STORAGE_KEY)||'{}');return raw&&typeof raw==='object'?raw:{}}catch{return{}}}
 function persistCalibrationMap(map){try{localStorage.setItem(CALIBRATION_STORAGE_KEY,JSON.stringify(map))}catch(err){console.warn('Calibration storage gagal:',err)}}
 function currentSceneryKey(){const kind=$('scenerySelect')?.value||'classic';return kind==='custom'?customSceneryKey:kind}
-function defaultGridForSelectedScenery(){const kind=$('scenerySelect')?.value||FIXED_SCENERY_ID;if(kind===FIXED_SCENERY_ID)return calCloneGrid(SKELETON_KINGDOM_GRID);if(kind==='custom'||kind==='sakura')return calCloneGrid(DEFAULT_CALIBRATION_GRID);const grid=window.GameAssetPack?.sceneryInfo(kind)?.grid;return calValidGrid(grid)?calCloneGrid(grid):calCloneGrid(DEFAULT_CALIBRATION_GRID)}
-function effectiveGridForSelectedScenery(){const key=currentSceneryKey();if(key===FIXED_SCENERY_ID)return calCloneGrid(SKELETON_KINGDOM_GRID);if(calibrationState?.key===key&&calValidGrid(calibrationState.draftGrid))return calibrationState.draftGrid;const saved=loadCalibrationMap()[key];return calValidGrid(saved)?calCloneGrid(saved):defaultGridForSelectedScenery()}
+function skeletonKingdomGrid(){const grid=window.SKELETON_KINGDOM_BUILDABLE_GRID||window.GameAssetPack?.sceneryInfo(FIXED_SCENERY_ID)?.grid||SKELETON_KINGDOM_GRID;return calValidGrid(grid)?calCloneGrid(grid):calCloneGrid(SKELETON_KINGDOM_GRID)}
+function defaultGridForSelectedScenery(){const kind=$('scenerySelect')?.value||FIXED_SCENERY_ID;if(kind===FIXED_SCENERY_ID)return skeletonKingdomGrid();if(kind==='custom'||kind==='sakura')return calCloneGrid(DEFAULT_CALIBRATION_GRID);const grid=window.GameAssetPack?.sceneryInfo(kind)?.grid;return calValidGrid(grid)?calCloneGrid(grid):calCloneGrid(DEFAULT_CALIBRATION_GRID)}
+function effectiveGridForSelectedScenery(){const key=currentSceneryKey();if(key===FIXED_SCENERY_ID)return skeletonKingdomGrid();if(calibrationState?.key===key&&calValidGrid(calibrationState.draftGrid))return calibrationState.draftGrid;const saved=loadCalibrationMap()[key];return calValidGrid(saved)?calCloneGrid(saved):defaultGridForSelectedScenery()}
 function selectedSceneryImage(){const kind=$('scenerySelect')?.value||'classic';if(kind==='custom')return customScenery;if(kind==='sakura')return sceneryReady?sceneryImage:null;return window.GameAssetPack?.scenery(kind)||null}
 function screenGridCorners(frame,grid){const map=([x,y])=>({x:frame.x+x*frame.w,y:frame.y+y*frame.h});return{top:map(grid.top),right:map(grid.right),bottom:map(grid.bottom),left:map(grid.left)}}
 function bilinearPoint(corners,u,v){const a=(1-u)*(1-v),b=u*(1-v),c=u*v,d=(1-u)*v;return{x:a*corners.top.x+b*corners.right.x+c*corners.bottom.x+d*corners.left.x,y:a*corners.top.y+b*corners.right.y+c*corners.bottom.y+d*corners.left.y}}
@@ -391,13 +395,13 @@ function handleCalibrationPointerMove(e,p){
 }
 
 function masterMetrics(){const W=canvas.width,H=canvas.height,gw=current?.grid?.width||44,gh=current?.grid?.height||44,pad=58,cs=Math.floor(Math.min((W-pad*2)/gw,(H-pad*2)/gh)),ox=Math.floor((W-cs*gw)/2),oy=Math.floor((H-cs*gh)/2);return{W,H,gw,gh,cs,ox,oy}}
-function isoMetrics(){const W=canvas.width,H=canvas.height,gw=current?.grid?.width||44,gh=current?.grid?.height||44;if(sceneryFrame?.grid){const corners=screenGridCorners(sceneryFrame,sceneryFrame.grid),{top,right,bottom,left}=corners,tw=Math.max(8,Math.abs(right.x-left.x)*2/gw),th=Math.max(6,Math.abs(bottom.y-top.y)*2/gh);return{W,H,gw,gh,tw,th,ox:top.x,oy:top.y,corners}}const tw=Math.min(24,Math.floor((W-160)/gw)),th=tw/2,ox=W/2,oy=Math.max(70,Math.floor((H-gh*th)/2));return{W,H,gw,gh,tw,th,ox,oy}}
+function isoMetrics(){const W=canvas.width,H=canvas.height,gw=current?.grid?.width||HOME_VILLAGE_GRID_SIZE,gh=current?.grid?.height||HOME_VILLAGE_GRID_SIZE;if(sceneryFrame?.grid){const corners=screenGridCorners(sceneryFrame,sceneryFrame.grid),{top,right,left}=corners,tw=Math.abs(right.x-top.x)/gw+Math.abs(top.x-left.x)/gh,th=Math.abs(right.y-top.y)/gw+Math.abs(left.y-top.y)/gh;return{W,H,gw,gh,tw:Math.max(1,tw),th:Math.max(1,th),ox:top.x,oy:top.y,corners}}const tw=Math.min(24,Math.floor((W-160)/gw)),th=tw/2,ox=W/2,oy=Math.max(70,Math.floor((H-gh*th)/2));return{W,H,gw,gh,tw,th,ox,oy}}
 function roundRect(ctx,x,y,w,h,r,fill,stroke){ctx.beginPath();ctx.roundRect(x,y,w,h,r);if(fill){ctx.fillStyle=fill;ctx.fill()}if(stroke){ctx.strokeStyle=stroke;ctx.stroke()}}
 function drawMaster(){canvas.style.backgroundImage='none';const m=masterMetrics();ctx.clearRect(0,0,m.W,m.H);const bg=ctx.createLinearGradient(0,0,0,m.H);bg.addColorStop(0,'#1a0d18');bg.addColorStop(1,'#2d1c2b');ctx.fillStyle=bg;ctx.fillRect(0,0,m.W,m.H);ctx.fillStyle='rgba(250,220,213,.025)';for(let i=0;i<20;i++){ctx.beginPath();ctx.arc((i*137)%m.W,(i*83)%m.H,30+(i%4)*12,0,Math.PI*2);ctx.fill()}if(showGrid){ctx.strokeStyle='rgba(250,220,213,.10)';ctx.lineWidth=1;for(let x=0;x<=m.gw;x++){const px=m.ox+x*m.cs;ctx.beginPath();ctx.moveTo(px,m.oy);ctx.lineTo(px,m.oy+m.gh*m.cs);ctx.stroke()}for(let y=0;y<=m.gh;y++){const py=m.oy+y*m.cs;ctx.beginPath();ctx.moveTo(m.ox,py);ctx.lineTo(m.ox+m.gw*m.cs,py);ctx.stroke()}}if(current?.walls)for(const w of current.walls){const x=m.ox+w.x*m.cs,y=m.oy+w.y*m.cs;const g=ctx.createLinearGradient(x,y,x,y+m.cs);g.addColorStop(0,'#eadfe5');g.addColorStop(1,'#a998a4');roundRect(ctx,x+1,y+2,m.cs-2,m.cs-4,Math.max(2,m.cs*.15),g,'rgba(255,255,255,.14)')}if(current?.buildings)current.buildings.forEach((b,i)=>drawMasterBuilding(b,i,m));if(dragState?.candidate&&previewMode==='master')drawMasterGhost(dragState,m)}
 function drawMasterBuilding(b,i,m){const x=m.ox+b.x*m.cs,y=m.oy+b.y*m.cs,w=b.w*m.cs,h=b.h*m.cs,selected=dragState?.index===i||hoverState?.buildingIndex===i;roundRect(ctx,x+2,y+2,w-4,h-4,Math.max(5,m.cs*.25),b.color,selected?'rgba(255,255,255,.9)':'rgba(255,255,255,.20)');ctx.fillStyle='rgba(12,5,10,.18)';roundRect(ctx,x+5,y+h*.58,w-10,h*.23,5,'rgba(10,4,9,.16)');ctx.fillStyle='#fff5f7';ctx.font=`800 ${Math.max(10,Math.min(16,m.cs*.68))}px Inter`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(b.abbr,x+w/2,y+h/2-2);ctx.font=`700 ${Math.max(8,Math.min(11,m.cs*.45))}px Inter`;ctx.fillStyle='rgba(255,245,247,.78)';ctx.fillText('Lv '+b.level,x+w/2,y+h-10)}
 function drawMasterGhost(ds,m){const b=current.buildings[ds.index],c=ds.candidate,x=m.ox+c.x*m.cs,y=m.oy+c.y*m.cs,w=b.w*m.cs,h=b.h*m.cs;ctx.save();ctx.globalAlpha=.50;roundRect(ctx,x+2,y+2,w-4,h-4,7,ds.valid?'#8dc9a8':'#df7586',ds.valid?'#dff7e7':'#ffd0d8');ctx.restore()}
 function isoPoint(m,x,y){if(m.corners)return bilinearPoint(m.corners,x/m.gw,y/m.gh);return{x:m.ox+(x-y)*(m.tw/2),y:m.oy+(x+y)*(m.th/2)}}
-function drawIsoTile(m,x,y,fill,alpha=1){const p1=isoPoint(m,x,y),p2=isoPoint(m,x+1,y),p3=isoPoint(m,x+1,y+1),p4=isoPoint(m,x,y+1);ctx.save();ctx.globalAlpha=alpha;ctx.beginPath();ctx.moveTo(p1.x,p1.y);ctx.lineTo(p2.x,p2.y);ctx.lineTo(p3.x,p3.y);ctx.lineTo(p4.x,p4.y);ctx.closePath();ctx.fillStyle=fill;ctx.fill();ctx.strokeStyle='rgba(255,255,255,.07)';ctx.stroke();ctx.restore()}
+function drawIsoTile(m,x,y,fill,alpha=1,stroke='rgba(255,255,255,.08)'){const p1=isoPoint(m,x,y),p2=isoPoint(m,x+1,y),p3=isoPoint(m,x+1,y+1),p4=isoPoint(m,x,y+1);ctx.save();ctx.globalAlpha=alpha;ctx.beginPath();ctx.moveTo(p1.x,p1.y);ctx.lineTo(p2.x,p2.y);ctx.lineTo(p3.x,p3.y);ctx.lineTo(p4.x,p4.y);ctx.closePath();ctx.fillStyle=fill;ctx.fill();ctx.globalAlpha=1;ctx.strokeStyle=stroke;ctx.lineWidth=.8;ctx.stroke();ctx.restore()}
 function drawMappedGrid(m){
   if(!m.corners)return;
   const line=(a,b,color,width)=>{ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.strokeStyle=color;ctx.lineWidth=width;ctx.stroke()};
@@ -413,11 +417,10 @@ function drawContainedImage(img,W,H){const scale=Math.min(W/img.naturalWidth,H/i
 function drawImageAtFrame(img,frame){ctx.drawImage(img,frame.x,frame.y,frame.w,frame.h);return{x:frame.x,y:frame.y,w:frame.w,h:frame.h}}
 function drawCalibratedImage(img,W,H,grid){const info=window.GameAssetPack?.sceneryInfo(FIXED_SCENERY_ID);if(info?.file){canvas.style.backgroundImage=`url("assets/game/scenery/${encodeURI(info.file)}")`;canvas.style.backgroundSize='100% 100%';canvas.style.backgroundPosition='0 0';canvas.style.backgroundRepeat='no-repeat'}return{x:0,y:0,w:W,h:H}}
 function drawSceneryBackground(){const W=canvas.width,H=canvas.height,kind=FIXED_SCENERY_ID,grid=effectiveGridForSelectedScenery();sceneryFrame=null;canvas.style.backgroundColor='#102c3a';const info=window.GameAssetPack?.sceneryInfo(kind),image=window.GameAssetPack?.scenery(kind);if(info){const frame=drawCalibratedImage(image,W,H,grid);sceneryFrame={...frame,grid};return}canvas.style.backgroundImage='none';ctx.fillStyle='#102c3a';ctx.fillRect(0,0,W,H);drawHomeVillageFallback(W,H)}
-function drawIsoWall(w,m){const sprite=window.GameAssetPack?.wall(villageWallLevel());const c=isoPoint(m,w.x+.5,w.y+.5);if(sprite){const size=m.tw*1.65;ctx.drawImage(sprite,c.x-size/2,c.y-size*.72,size,size);return}drawIsoTile(m,w.x,w.y,'#8b795f',1);const top=isoPoint(m,w.x+.5,w.y+.5);ctx.fillStyle='#d9c49c';ctx.beginPath();ctx.ellipse(top.x,top.y-4,m.tw*.34,m.th*.42,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#6d5a43';ctx.stroke()}
-function drawScenery(){ctx.clearRect(0,0,canvas.width,canvas.height);drawSceneryBackground();const m=isoMetrics();if(showGrid)drawMappedGrid(m)}
-function drawIsoBuildingFallback(b,m,c){for(let dx=0;dx<b.w;dx++)for(let dy=0;dy<b.h;dy++)drawIsoTile(m,b.x+dx,b.y+dy,b.color,.96);const radius=Math.max(7,Math.min(18,(b.w+b.h)*2));ctx.fillStyle='rgba(20,12,5,.30)';ctx.beginPath();ctx.ellipse(c.x,c.y+5,radius*1.35,radius*.58,0,0,Math.PI*2);ctx.fill();ctx.fillStyle=b.color;ctx.strokeStyle='rgba(255,255,255,.56)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(c.x,c.y-radius*1.45);ctx.lineTo(c.x+radius,c.y-radius*.45);ctx.lineTo(c.x,c.y+radius*.12);ctx.lineTo(c.x-radius,c.y-radius*.45);ctx.closePath();ctx.fill();ctx.stroke();ctx.fillStyle='#fff7d6';ctx.font='900 11px Trebuchet MS';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(b.abbr,c.x,c.y-radius*.55)}
-function drawLevelBadge(b,c,m){const label='Lv '+b.level;ctx.font='800 9px Trebuchet MS';const width=Math.max(28,ctx.measureText(label).width+10);roundRect(ctx,c.x-width/2,c.y+m.th*.72,width,16,7,'rgba(38,24,13,.88)','#e8bd58');ctx.fillStyle='#fff4c7';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(label,c.x,c.y+m.th*.72+8)}
-function drawIsoBuilding(b,m){const c=isoPoint(m,b.x+b.w/2,b.y+b.h/2),sprite=window.GameAssetPack?.building(b.id,b.level);if(sprite){ctx.save();ctx.fillStyle='rgba(13,20,8,.28)';ctx.beginPath();ctx.ellipse(c.x,c.y+5,Math.max(12,b.w*m.tw*.42),Math.max(5,b.h*m.th*.4),0,0,Math.PI*2);ctx.fill();const width=Math.max(44,Math.max(b.w,b.h)*m.tw*1.28),height=width;ctx.drawImage(sprite,c.x-width/2,c.y-height*.72,width,height);ctx.restore()}else drawIsoBuildingFallback(b,m,c);drawLevelBadge(b,c,m)}
+function drawIsoWall(w,m){drawIsoTile(m,w.x,w.y,'#d2c5cd',.92,'rgba(255,255,255,.12)')}
+function drawIsoBuilding(b,m){for(let dy=0;dy<b.h;dy++)for(let dx=0;dx<b.w;dx++)drawIsoTile(m,b.x+dx,b.y+dy,b.color,.95,'rgba(255,255,255,.11)');const c=isoPoint(m,b.x+b.w/2,b.y+b.h/2),fontSize=Math.max(8,Math.min(12,m.tw*1.4));ctx.save();ctx.font=`800 ${fontSize}px Inter, sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineJoin='round';ctx.lineWidth=3;ctx.strokeStyle='rgba(29,12,24,.72)';ctx.strokeText(b.abbr,c.x,c.y-1);ctx.fillStyle='#fff7f8';ctx.fillText(b.abbr,c.x,c.y-1);ctx.restore()}
+function drawGeneratedScenery(m){const walls=(current?.walls||[]).slice().sort((a,b)=>{const pa=isoPoint(m,a.x+1,a.y+1),pb=isoPoint(m,b.x+1,b.y+1);return pa.y-pb.y||pa.x-pb.x});for(const wall of walls)drawIsoWall(wall,m);const buildings=(current?.buildings||[]).slice().sort((a,b)=>{const pa=isoPoint(m,a.x+a.w,a.y+a.h),pb=isoPoint(m,b.x+b.w,b.y+b.h);return pa.y-pb.y||pa.x-pb.x});for(const building of buildings)drawIsoBuilding(building,m)}
+function drawScenery(){ctx.clearRect(0,0,canvas.width,canvas.height);drawSceneryBackground();const m=isoMetrics();if(showGrid)drawMappedGrid(m);drawGeneratedScenery(m)}
 function drawIsoGhost(ds,m){const b=current.buildings[ds.index],c=ds.candidate;for(let dx=0;dx<b.w;dx++)for(let dy=0;dy<b.h;dy++)drawIsoTile(m,c.x+dx,c.y+dy,ds.valid?'#8dc9a8':'#df7586',.55)}
 function drawCanvas(){if(previewMode==='master')drawMaster();else drawScenery()}
 function render(){drawCanvas();updateSummary();renderBuildingLegend();renderModuleList()}
@@ -461,7 +464,7 @@ function setPreviewMode(mode){
   $('scenerySelect').style.display='none';
   $('sceneryFile').style.display='none';
   $('previewStage').classList.toggle('sceneryMode',mode==='scenery');
-  $('stageHint').innerHTML=mode==='scenery'?'<b>Skeleton Kingdom:</b> grid buildable 44×44 • wheel untuk zoom • double click untuk reset zoom':'<b>Tip:</b> hover untuk detail • drag building untuk pindah • wheel untuk zoom • double click untuk reset zoom';
+  $('stageHint').innerHTML=mode==='scenery'?'<b>Skeleton Kingdom:</b> grid buildable 44×44 • wheel untuk zoom • klik-tahan lalu geser view':'<b>Tip:</b> drag area kosong untuk geser view • drag building untuk pindah • wheel untuk zoom';
   syncCanvasDimensions();
   zoom=1;
   updateCalibrationControls();
@@ -494,6 +497,30 @@ function zoomAtPointer(e){
   vp.scrollTop=contentY*ratio-localY;
 }
 function fitZoom(){setZoom(1);$('viewport').scrollTo({left:0,top:0})}
+let panState=null;
+function beginViewportPan(e){
+  if(e.button!==0||calibrationState||dragState)return;
+  const vp=$('viewport');
+  panState={pointerId:e.pointerId,startX:e.clientX,startY:e.clientY,scrollLeft:vp.scrollLeft,scrollTop:vp.scrollTop};
+  vp.setPointerCapture?.(e.pointerId);
+  vp.classList.add('isPanning');
+  $('hoverCard').style.display='none';
+  e.preventDefault();
+}
+function moveViewportPan(e){
+  if(!panState||e.pointerId!==panState.pointerId)return;
+  const vp=$('viewport');
+  vp.scrollLeft=panState.scrollLeft-(e.clientX-panState.startX);
+  vp.scrollTop=panState.scrollTop-(e.clientY-panState.startY);
+  e.preventDefault();
+}
+function endViewportPan(e){
+  if(!panState||e.pointerId!==panState.pointerId)return;
+  const vp=$('viewport');
+  if(vp.hasPointerCapture?.(e.pointerId))vp.releasePointerCapture(e.pointerId);
+  panState=null;
+  vp.classList.remove('isPanning');
+}
 function generateFull(){layoutRoll++;buildingRoll=0;const seed=$('seed').value.trim()||'YUSHIKA-LAYOUT-STUDIO';current=generateWalls(seed);generateBuildingsForCurrent();render()}
 function generateBuildingsOnly(){if(!current?.walls?.length){generateFull();return}generateBuildingsForCurrent();render()}
 
@@ -502,7 +529,15 @@ $('villageFile').addEventListener('change',async e=>{const f=e.target.files?.[0]
 $('loadExample').addEventListener('click',()=>{$('villageInput').value=JSON.stringify(EXAMPLE_VILLAGE_JSON,null,2);applyParsedVillage(parseVillageExportObject(EXAMPLE_VILLAGE_JSON));generateFull()});$('clearVillage').addEventListener('click',()=>{$('villageInput').value='';$('villageFile').value='';clearParsedVillage()});
 $('generateFull').addEventListener('click',generateFull);$('generateBuildingsOnly').addEventListener('click',generateBuildingsOnly);$('reroll').addEventListener('click',()=>{$('seed').value='LAYOUT-'+Math.random().toString(36).slice(2,10).toUpperCase();generateFull()});$('resetDefaults').addEventListener('click',()=>{$('seed').value='YUSHIKA-LAYOUT-STUDIO';$('gridW').value=44;$('gridH').value=44;$('targetTH').value=parsedVillage?.townHall||10;$('targetWalls').value=parsedVillage?.wallCount||275;$('minGap').value=1;$('margin').value=1;$('jitter').value=4;$('symmetry').value='loose';$('buildingDensity').value='all';generateFull()});
 $('modeMaster').addEventListener('click',()=>setPreviewMode('master'));$('modeScenery').addEventListener('click',()=>setPreviewMode('scenery'));$('toggleGrid').addEventListener('click',()=>{showGrid=!showGrid;$('toggleGrid').style.opacity=showGrid?'1':'.55';render()});
-$('viewport').addEventListener('wheel',e=>{e.preventDefault();zoomAtPointer(e)},{passive:false});$('viewport').addEventListener('dblclick',e=>{if(e.target===canvas){fitZoom()}});window.addEventListener('resize',()=>applyCanvasScale());
+const viewport=$('viewport');
+viewport.addEventListener('wheel',e=>{e.preventDefault();zoomAtPointer(e)},{passive:false});
+viewport.addEventListener('pointerdown',beginViewportPan);
+viewport.addEventListener('pointermove',moveViewportPan);
+viewport.addEventListener('pointerup',endViewportPan);
+viewport.addEventListener('pointercancel',endViewportPan);
+viewport.addEventListener('lostpointercapture',e=>{if(panState?.pointerId===e.pointerId){panState=null;viewport.classList.remove('isPanning')}});
+viewport.addEventListener('dblclick',e=>{if(e.target===canvas){fitZoom()}});
+window.addEventListener('resize',()=>applyCanvasScale());
 $('calibrateScenery').addEventListener('click',beginCalibration);$('saveCalibration').addEventListener('click',saveCalibration);$('resetCalibration').addEventListener('click',resetCalibration);$('cancelCalibration').addEventListener('click',cancelCalibration);$('exportCalibrations').addEventListener('click',exportCalibrations);
 $('useParsedWalls').addEventListener('change',()=>{if(parsedVillage?.wallCount&&$('useParsedWalls').value==='yes')$('targetWalls').value=parsedVillage.wallCount});$('copyJson').addEventListener('click',async()=>{if(!current)return;try{await navigator.clipboard.writeText(JSON.stringify(current,null,2));alert('JSON dicopy.')}catch{alert('Clipboard gagal.')}});$('downloadJson').addEventListener('click',()=>{if(!current)return;const blob=new Blob([JSON.stringify(current,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`village_layout_th${current.targetTownHall}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)});
 
