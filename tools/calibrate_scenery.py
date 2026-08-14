@@ -116,20 +116,36 @@ def display_name(slug: str) -> str:
 
 catalog = []
 requested = set(sys.argv[1:])
-for asset in sorted(SCENERY_DIR.glob("*.webp")):
-    if asset.stem.endswith("-closeup"):
+manifest_path = SCENERY_DIR / "manifest.json"
+if manifest_path.exists():
+    records = json.loads(manifest_path.read_text(encoding="utf-8-sig"))
+    grouped: dict[str, list[dict]] = {}
+    for record in records:
+        grouped.setdefault(record["id"], []).append(record)
+    assets = []
+    for slug, variants in sorted(grouped.items()):
+        preferred = next((item for item in variants if item["variant"] == "closeup"), None)
+        preferred = preferred or next((item for item in variants if item["variant"] == "default"), None)
+        preferred = preferred or variants[0]
+        assets.append((slug, SCENERY_DIR / preferred["file"]))
+else:
+    # Backward compatibility for manually supplied scenery files.
+    extensions = {".jpg", ".jpeg", ".png", ".webp"}
+    files = [path for path in SCENERY_DIR.iterdir() if path.suffix.lower() in extensions]
+    bases = [path for path in files if not path.stem.endswith(("-closeup", "-full"))]
+    assets = []
+    for asset in sorted(bases):
+        closeup = next((path for path in files if path.stem == f"{asset.stem}-closeup"), None)
+        assets.append((asset.stem, closeup or asset))
+
+for slug, display_asset in assets:
+    if requested and slug not in requested:
         continue
-    if requested and asset.stem not in requested:
-        continue
-    display_asset = asset
-    closeup = SCENERY_DIR / f"{asset.stem}-closeup.webp"
-    if closeup.exists():
-        display_asset = closeup
     catalog.append({
-        "id": asset.stem,
-        "name": display_name(asset.stem),
+        "id": slug,
+        "name": display_name(slug),
         "file": display_asset.name,
-        "grid": calibrated_corners(display_asset, asset.stem),
+        "grid": calibrated_corners(display_asset, slug),
     })
 
 payload = json.dumps(catalog, ensure_ascii=False, separators=(",", ":"))
