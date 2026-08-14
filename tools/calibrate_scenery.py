@@ -85,10 +85,10 @@ def detect_corners(path: Path) -> dict[str, list[float]]:
 def calibrated_corners(path: Path, slug: str) -> dict[str, list[float]]:
     if slug == "skeleton-kingdom":
         return {
-            "top": [0.498, 0.225],
-            "right": [0.691, 0.422],
-            "bottom": [0.499, 0.625],
-            "left": [0.316, 0.423],
+            "top": [0.500302, 0.221765],
+            "right": [0.648208, 0.425235],
+            "bottom": [0.500201, 0.628559],
+            "left": [0.352691, 0.423000],
         }
     with Image.open(path) as source:
         aspect = source.width / source.height
