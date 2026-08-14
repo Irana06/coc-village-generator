@@ -141,7 +141,9 @@ foreach ($group in ($manifest | Group-Object id | Sort-Object Name)) {
     if (-not $preferred) { $preferred = $group.Group | Where-Object variant -eq "default" | Select-Object -First 1 }
     if (-not $preferred) { $preferred = $group.Group | Select-Object -First 1 }
     $old = $oldCatalog[$group.Name]
-    $grid = if ($old -and $old.grid) { $old.grid } else {
+    $grid = if ($group.Name -eq "skeleton-kingdom") {
+        [pscustomobject]@{ top = @(0.498, 0.225); right = @(0.691, 0.422); bottom = @(0.499, 0.625); left = @(0.316, 0.423) }
+    } elseif ($old -and $old.grid) { $old.grid } else {
         [pscustomobject]@{ top = @(0.51, 0.10); right = @(0.85, 0.48); bottom = @(0.51, 0.87); left = @(0.19, 0.52) }
     }
     $catalog += [pscustomobject]@{ id = $group.Name; name = $preferred.name; file = $preferred.file; grid = $grid }

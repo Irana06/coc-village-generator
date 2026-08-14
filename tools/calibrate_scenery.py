@@ -83,6 +83,13 @@ def detect_corners(path: Path) -> dict[str, list[float]]:
 
 
 def calibrated_corners(path: Path, slug: str) -> dict[str, list[float]]:
+    if slug == "skeleton-kingdom":
+        return {
+            "top": [0.498, 0.225],
+            "right": [0.691, 0.422],
+            "bottom": [0.499, 0.625],
+            "left": [0.316, 0.423],
+        }
     with Image.open(path) as source:
         aspect = source.width / source.height
     # The original 3705x2545 captures share one camera transform. Their broad

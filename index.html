@@ -114,7 +114,7 @@ button{border:0;border-radius:12px;padding:9px 11px;color:white;font-weight:800;
 
     <section class="previewStage" id="previewStage">
       <div class="viewport" id="viewport"><div class="canvasWrap"><canvas id="previewCanvas" width="1280" height="900"></canvas></div></div>
-      <div class="stageHint"><b>Tip:</b> hover untuk detail • drag building untuk pindah • wheel untuk zoom • double click untuk reset zoom</div>
+      <div class="stageHint" id="stageHint"><b>Skeleton Kingdom:</b> grid buildable 44×44 • wheel untuk zoom • double click untuk reset zoom</div>
       <div id="dragGhost" class="dragGhost"></div>
     </section>
   </main>
@@ -197,6 +197,7 @@ const SAKURA_BG = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wCEAAQGBg
 
 const $=id=>document.getElementById(id); const canvas=$('previewCanvas'); const ctx=canvas.getContext('2d');
 const FIXED_SCENERY_ID='skeleton-kingdom';
+const SKELETON_KINGDOM_GRID={top:[.498,.225],right:[.691,.422],bottom:[.499,.625],left:[.316,.423]};
 let current=null, referenceComponents=[], parsedVillage=null; let previewMode='scenery'; let zoom=1; let showGrid=true; let buildingRoll=0; let layoutRoll=0; let customScenery=null; let customSceneryKey='custom';
 let hoverState=null; let dragState=null; let sceneryImage=null; let sceneryReady=false; let sceneryFrame=null;
 
@@ -245,8 +246,8 @@ function calValidGrid(grid){return!!grid&&CALIBRATION_CORNERS.every(k=>Array.isA
 function loadCalibrationMap(){try{const raw=JSON.parse(localStorage.getItem(CALIBRATION_STORAGE_KEY)||'{}');return raw&&typeof raw==='object'?raw:{}}catch{return{}}}
 function persistCalibrationMap(map){try{localStorage.setItem(CALIBRATION_STORAGE_KEY,JSON.stringify(map))}catch(err){console.warn('Calibration storage gagal:',err)}}
 function currentSceneryKey(){const kind=$('scenerySelect')?.value||'classic';return kind==='custom'?customSceneryKey:kind}
-function defaultGridForSelectedScenery(){const kind=$('scenerySelect')?.value||'classic';if(kind==='custom'||kind==='sakura')return calCloneGrid(DEFAULT_CALIBRATION_GRID);const grid=window.GameAssetPack?.sceneryInfo(kind)?.grid;return calValidGrid(grid)?calCloneGrid(grid):calCloneGrid(DEFAULT_CALIBRATION_GRID)}
-function effectiveGridForSelectedScenery(){const key=currentSceneryKey();if(calibrationState?.key===key&&calValidGrid(calibrationState.draftGrid))return calibrationState.draftGrid;const saved=loadCalibrationMap()[key];return calValidGrid(saved)?calCloneGrid(saved):defaultGridForSelectedScenery()}
+function defaultGridForSelectedScenery(){const kind=$('scenerySelect')?.value||FIXED_SCENERY_ID;if(kind===FIXED_SCENERY_ID)return calCloneGrid(SKELETON_KINGDOM_GRID);if(kind==='custom'||kind==='sakura')return calCloneGrid(DEFAULT_CALIBRATION_GRID);const grid=window.GameAssetPack?.sceneryInfo(kind)?.grid;return calValidGrid(grid)?calCloneGrid(grid):calCloneGrid(DEFAULT_CALIBRATION_GRID)}
+function effectiveGridForSelectedScenery(){const key=currentSceneryKey();if(key===FIXED_SCENERY_ID)return calCloneGrid(SKELETON_KINGDOM_GRID);if(calibrationState?.key===key&&calValidGrid(calibrationState.draftGrid))return calibrationState.draftGrid;const saved=loadCalibrationMap()[key];return calValidGrid(saved)?calCloneGrid(saved):defaultGridForSelectedScenery()}
 function selectedSceneryImage(){const kind=$('scenerySelect')?.value||'classic';if(kind==='custom')return customScenery;if(kind==='sakura')return sceneryReady?sceneryImage:null;return window.GameAssetPack?.scenery(kind)||null}
 function screenGridCorners(frame,grid){const map=([x,y])=>({x:frame.x+x*frame.w,y:frame.y+y*frame.h});return{top:map(grid.top),right:map(grid.right),bottom:map(grid.bottom),left:map(grid.left)}}
 function bilinearPoint(corners,u,v){const a=(1-u)*(1-v),b=u*(1-v),c=u*v,d=(1-u)*v;return{x:a*corners.top.x+b*corners.right.x+c*corners.bottom.x+d*corners.left.x,y:a*corners.top.y+b*corners.right.y+c*corners.bottom.y+d*corners.left.y}}
@@ -397,6 +398,15 @@ function drawMasterBuilding(b,i,m){const x=m.ox+b.x*m.cs,y=m.oy+b.y*m.cs,w=b.w*m
 function drawMasterGhost(ds,m){const b=current.buildings[ds.index],c=ds.candidate,x=m.ox+c.x*m.cs,y=m.oy+c.y*m.cs,w=b.w*m.cs,h=b.h*m.cs;ctx.save();ctx.globalAlpha=.50;roundRect(ctx,x+2,y+2,w-4,h-4,7,ds.valid?'#8dc9a8':'#df7586',ds.valid?'#dff7e7':'#ffd0d8');ctx.restore()}
 function isoPoint(m,x,y){if(m.corners)return bilinearPoint(m.corners,x/m.gw,y/m.gh);return{x:m.ox+(x-y)*(m.tw/2),y:m.oy+(x+y)*(m.th/2)}}
 function drawIsoTile(m,x,y,fill,alpha=1){const p1=isoPoint(m,x,y),p2=isoPoint(m,x+1,y),p3=isoPoint(m,x+1,y+1),p4=isoPoint(m,x,y+1);ctx.save();ctx.globalAlpha=alpha;ctx.beginPath();ctx.moveTo(p1.x,p1.y);ctx.lineTo(p2.x,p2.y);ctx.lineTo(p3.x,p3.y);ctx.lineTo(p4.x,p4.y);ctx.closePath();ctx.fillStyle=fill;ctx.fill();ctx.strokeStyle='rgba(255,255,255,.07)';ctx.stroke();ctx.restore()}
+function drawMappedGrid(m){
+  if(!m.corners)return;
+  const line=(a,b,color,width)=>{ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.strokeStyle=color;ctx.lineWidth=width;ctx.stroke()};
+  ctx.save();ctx.lineCap='round';ctx.lineJoin='round';
+  ctx.fillStyle='rgba(255,239,187,.035)';ctx.beginPath();ctx.moveTo(m.corners.top.x,m.corners.top.y);ctx.lineTo(m.corners.right.x,m.corners.right.y);ctx.lineTo(m.corners.bottom.x,m.corners.bottom.y);ctx.lineTo(m.corners.left.x,m.corners.left.y);ctx.closePath();ctx.fill();
+  for(let x=0;x<=m.gw;x++){const major=x%5===0,color=major?'rgba(255,225,155,.34)':'rgba(255,255,255,.19)';line(isoPoint(m,x,0),isoPoint(m,x,m.gh),color,major?1.15:.65)}
+  for(let y=0;y<=m.gh;y++){const major=y%5===0,color=major?'rgba(255,225,155,.34)':'rgba(255,255,255,.19)';line(isoPoint(m,0,y),isoPoint(m,m.gw,y),color,major?1.15:.65)}
+  ctx.strokeStyle='rgba(255,235,177,.86)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(m.corners.top.x,m.corners.top.y);ctx.lineTo(m.corners.right.x,m.corners.right.y);ctx.lineTo(m.corners.bottom.x,m.corners.bottom.y);ctx.lineTo(m.corners.left.x,m.corners.left.y);ctx.closePath();ctx.stroke();ctx.restore()
+}
 function villageWallLevel(){const walls=parsedVillage?.raw?.buildings?.filter(b=>Number(b.data)===1000010)||[];return walls.reduce((max,w)=>Math.max(max,Number(w.lvl||w.level||1)),1)}
 function drawHomeVillageFallback(W,H){const sky=ctx.createLinearGradient(0,0,0,H);sky.addColorStop(0,'#5cc7ef');sky.addColorStop(.48,'#95dff0');sky.addColorStop(.49,'#3a88a7');sky.addColorStop(1,'#164f6c');ctx.fillStyle=sky;ctx.fillRect(0,0,W,H);ctx.fillStyle='rgba(255,255,255,.22)';for(let i=0;i<9;i++){ctx.beginPath();ctx.arc(70+i*157,90+(i%3)*36,35+(i%2)*22,0,Math.PI*2);ctx.fill()}ctx.fillStyle='#2f6d32';ctx.beginPath();ctx.moveTo(W/2,70);ctx.lineTo(W-70,H/2);ctx.lineTo(W/2,H-28);ctx.lineTo(70,H/2);ctx.closePath();ctx.fill();ctx.strokeStyle='#174b27';ctx.lineWidth=22;ctx.stroke();ctx.strokeStyle='#72b94b';ctx.lineWidth=13;ctx.stroke()}
 function drawContainedImage(img,W,H){const scale=Math.min(W/img.naturalWidth,H/img.naturalHeight),w=img.naturalWidth*scale,h=img.naturalHeight*scale,x=(W-w)/2,y=(H-h)/2;ctx.drawImage(img,x,y,w,h);return{x,y,w,h}}
@@ -404,7 +414,7 @@ function drawImageAtFrame(img,frame){ctx.drawImage(img,frame.x,frame.y,frame.w,f
 function drawCalibratedImage(img,W,H,grid){const info=window.GameAssetPack?.sceneryInfo(FIXED_SCENERY_ID);if(info?.file){canvas.style.backgroundImage=`url("assets/game/scenery/${encodeURI(info.file)}")`;canvas.style.backgroundSize='100% 100%';canvas.style.backgroundPosition='0 0';canvas.style.backgroundRepeat='no-repeat'}return{x:0,y:0,w:W,h:H}}
 function drawSceneryBackground(){const W=canvas.width,H=canvas.height,kind=FIXED_SCENERY_ID,grid=effectiveGridForSelectedScenery();sceneryFrame=null;canvas.style.backgroundColor='#102c3a';const info=window.GameAssetPack?.sceneryInfo(kind),image=window.GameAssetPack?.scenery(kind);if(info){const frame=drawCalibratedImage(image,W,H,grid);sceneryFrame={...frame,grid};return}canvas.style.backgroundImage='none';ctx.fillStyle='#102c3a';ctx.fillRect(0,0,W,H);drawHomeVillageFallback(W,H)}
 function drawIsoWall(w,m){const sprite=window.GameAssetPack?.wall(villageWallLevel());const c=isoPoint(m,w.x+.5,w.y+.5);if(sprite){const size=m.tw*1.65;ctx.drawImage(sprite,c.x-size/2,c.y-size*.72,size,size);return}drawIsoTile(m,w.x,w.y,'#8b795f',1);const top=isoPoint(m,w.x+.5,w.y+.5);ctx.fillStyle='#d9c49c';ctx.beginPath();ctx.ellipse(top.x,top.y-4,m.tw*.34,m.th*.42,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#6d5a43';ctx.stroke()}
-function drawScenery(){ctx.clearRect(0,0,canvas.width,canvas.height);drawSceneryBackground();const m=isoMetrics();if(showGrid)for(let y=0;y<m.gh;y++)for(let x=0;x<m.gw;x++)drawIsoTile(m,x,y,'rgba(255,255,255,.025)',.20);if(current?.walls){const arr=current.walls.slice().sort((a,b)=>(a.x+a.y)-(b.x+b.y));for(const w of arr)drawIsoWall(w,m)}if(current?.buildings){const list=current.buildings.map((b,i)=>({...b,_i:i})).sort((a,b)=>(a.x+a.y+a.w+a.h)-(b.x+b.y+b.w+b.h));for(const b of list)drawIsoBuilding(b,m)}if(dragState?.candidate&&previewMode==='scenery')drawIsoGhost(dragState,m);drawCalibrationOverlay()}
+function drawScenery(){ctx.clearRect(0,0,canvas.width,canvas.height);drawSceneryBackground();const m=isoMetrics();if(showGrid)drawMappedGrid(m)}
 function drawIsoBuildingFallback(b,m,c){for(let dx=0;dx<b.w;dx++)for(let dy=0;dy<b.h;dy++)drawIsoTile(m,b.x+dx,b.y+dy,b.color,.96);const radius=Math.max(7,Math.min(18,(b.w+b.h)*2));ctx.fillStyle='rgba(20,12,5,.30)';ctx.beginPath();ctx.ellipse(c.x,c.y+5,radius*1.35,radius*.58,0,0,Math.PI*2);ctx.fill();ctx.fillStyle=b.color;ctx.strokeStyle='rgba(255,255,255,.56)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(c.x,c.y-radius*1.45);ctx.lineTo(c.x+radius,c.y-radius*.45);ctx.lineTo(c.x,c.y+radius*.12);ctx.lineTo(c.x-radius,c.y-radius*.45);ctx.closePath();ctx.fill();ctx.stroke();ctx.fillStyle='#fff7d6';ctx.font='900 11px Trebuchet MS';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(b.abbr,c.x,c.y-radius*.55)}
 function drawLevelBadge(b,c,m){const label='Lv '+b.level;ctx.font='800 9px Trebuchet MS';const width=Math.max(28,ctx.measureText(label).width+10);roundRect(ctx,c.x-width/2,c.y+m.th*.72,width,16,7,'rgba(38,24,13,.88)','#e8bd58');ctx.fillStyle='#fff4c7';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(label,c.x,c.y+m.th*.72+8)}
 function drawIsoBuilding(b,m){const c=isoPoint(m,b.x+b.w/2,b.y+b.h/2),sprite=window.GameAssetPack?.building(b.id,b.level);if(sprite){ctx.save();ctx.fillStyle='rgba(13,20,8,.28)';ctx.beginPath();ctx.ellipse(c.x,c.y+5,Math.max(12,b.w*m.tw*.42),Math.max(5,b.h*m.th*.4),0,0,Math.PI*2);ctx.fill();const width=Math.max(44,Math.max(b.w,b.h)*m.tw*1.28),height=width;ctx.drawImage(sprite,c.x-width/2,c.y-height*.72,width,height);ctx.restore()}else drawIsoBuildingFallback(b,m,c);drawLevelBadge(b,c,m)}
@@ -416,8 +426,8 @@ function canvasPoint(e){const r=canvas.getBoundingClientRect();return{x:(e.clien
 function masterGridFromPoint(p){const m=masterMetrics();return{x:Math.floor((p.x-m.ox)/m.cs),y:Math.floor((p.y-m.oy)/m.cs)}}
 function isoGridFromPoint(p){const m=isoMetrics();if(m.corners){const uv=bilinearInverse(m.corners,p);return{x:Math.floor(uv.u*m.gw),y:Math.floor(uv.v*m.gh)}}const a=(p.x-m.ox)/(m.tw/2),b=(p.y-m.oy)/(m.th/2);return{x:Math.floor((a+b)/2),y:Math.floor((b-a)/2)}}
 function pointToGrid(p){return previewMode==='master'?masterGridFromPoint(p):isoGridFromPoint(p)}
-function findBuildingAt(g){if(!current?.buildings)return-1;for(let i=current.buildings.length-1;i>=0;i--){const b=current.buildings[i];if(g.x>=b.x&&g.y>=b.y&&g.x<b.x+b.w&&g.y<b.y+b.h)return i}return-1}
-function findWallAt(g){if(!current?.walls)return null;return current.walls.find(w=>w.x===g.x&&w.y===g.y)||null}
+function findBuildingAt(g){if(previewMode==='scenery'||!current?.buildings)return-1;for(let i=current.buildings.length-1;i>=0;i--){const b=current.buildings[i];if(g.x>=b.x&&g.y>=b.y&&g.x<b.x+b.w&&g.y<b.y+b.h)return i}return-1}
+function findWallAt(g){if(previewMode==='scenery'||!current?.walls)return null;return current.walls.find(w=>w.x===g.x&&w.y===g.y)||null}
 function findModuleForWall(g){if(!current?.placements)return null;for(let i=0;i<current.placements.length;i++)if(current.placements[i].cells.some(c=>c.x===g.x&&c.y===g.y))return i+1;return null}
 function showHover(e,g){const card=$('hoverCard'),bi=findBuildingAt(g);hoverState={grid:g,buildingIndex:bi};if(bi>=0){const b=current.buildings[bi];card.innerHTML=`<div class="title">${b.name}</div><div class="meta">Level ${b.level} • ${b.w}×${b.h} tiles<br>Position: ${b.x}, ${b.y}<br>Category: ${b.category}</div><div class="badge">drag to move</div>`;card.style.display='block'}else{const wall=findWallAt(g);if(wall){const mod=findModuleForWall(g);card.innerHTML=`<div class="title">Wall</div><div class="meta">Tile: ${g.x}, ${g.y}${mod?`<br>Module: ${mod}`:''}</div>`;card.style.display='block'}else{card.style.display='none'}}if(card.style.display==='block'){card.style.left=Math.min(innerWidth-270,e.clientX+16)+'px';card.style.top=Math.min(innerHeight-130,e.clientY+16)+'px'}}
 function canMoveBuilding(index,x,y){const b=current.buildings[index],occ=buildOccupied(current.walls,current.buildings,index);return footprintFits(x,y,b.w,b.h,current.grid.width,current.grid.height,occ)}
@@ -451,6 +461,7 @@ function setPreviewMode(mode){
   $('scenerySelect').style.display='none';
   $('sceneryFile').style.display='none';
   $('previewStage').classList.toggle('sceneryMode',mode==='scenery');
+  $('stageHint').innerHTML=mode==='scenery'?'<b>Skeleton Kingdom:</b> grid buildable 44×44 • wheel untuk zoom • double click untuk reset zoom':'<b>Tip:</b> hover untuk detail • drag building untuk pindah • wheel untuk zoom • double click untuk reset zoom';
   syncCanvasDimensions();
   zoom=1;
   updateCalibrationControls();
