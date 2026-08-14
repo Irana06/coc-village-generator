@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Village Layout Studio</title>
 <style>
+/* FULL_BLEED_SCENERY_V1 */
 :root{
   --ink:#160b15; --ink2:#241624; --panel:rgba(31,18,30,.88); --panel2:rgba(46,31,45,.74);
   --mauve:#765D67; --wine:#6D3C52; --berry:#4B2138; --night:#1B0C1A; --plum:#2D222F; --cream:#FADCD5;
@@ -37,9 +38,11 @@ button{border:0;border-radius:12px;padding:9px 11px;color:white;font-weight:800;
 .projectTitle h2{margin:0;font-size:18px}.projectTitle p{margin:3px 0 0;color:var(--muted);font-size:11px}.topStats{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}.pill{padding:7px 10px;border-radius:999px;background:rgba(250,220,213,.05);border:1px solid var(--line);font-size:11px;white-space:nowrap}
 .previewToolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 10px;border-radius:18px;background:linear-gradient(180deg,rgba(45,34,47,.72),rgba(27,12,26,.78));border:1px solid var(--line);box-shadow:0 15px 40px rgba(0,0,0,.17)}
 .segment{display:flex;gap:3px;padding:3px;border-radius:13px;background:rgba(250,220,213,.055);border:1px solid rgba(250,220,213,.08)}.segment button{box-shadow:none;background:transparent;padding:7px 11px;color:var(--muted)}.segment button.active{background:linear-gradient(135deg,var(--mauve),var(--berry));color:white}.spacer{flex:1}
-.zoomCtl{display:flex;align-items:center;gap:6px}.zoomCtl button{padding:7px 9px;box-shadow:none}.zoomCtl input{width:120px}.zoomText{min-width:42px;text-align:center;font-size:11px;color:var(--muted)}
-.previewStage{min-height:0;border-radius:26px;background:linear-gradient(180deg,rgba(40,25,38,.76),rgba(18,8,16,.86));border:1px solid var(--line2);box-shadow:var(--shadow);overflow:hidden;position:relative}
-.viewport{position:absolute;inset:0;overflow:auto;padding:18px}.canvasWrap{min-width:100%;min-height:100%;display:flex;align-items:center;justify-content:center}.canvasWrap canvas{display:block;border-radius:20px;border:1px solid rgba(250,220,213,.09);box-shadow:0 18px 60px rgba(0,0,0,.25);background:#120a12;transform-origin:top left}
+.zoomReadout{display:flex;align-items:center;gap:7px;padding:0 4px;color:var(--muted);font-size:10px}.zoomText{min-width:42px;text-align:right;font-size:11px;color:var(--text);font-weight:800}
+.previewStage{min-height:0;border-radius:0;background:#102c3a;border:0;box-shadow:none;overflow:hidden;position:relative}
+.viewport{position:absolute;inset:0;overflow:auto;padding:0;overscroll-behavior:contain;scrollbar-gutter:stable}
+.canvasWrap{min-width:100%;min-height:100%;display:block;background:#102c3a}
+.canvasWrap canvas{display:block;margin:0;border:0;border-radius:0;box-shadow:none;background:#120a12;transform-origin:0 0;touch-action:none;max-width:none}
 .stageHint{position:absolute;left:20px;bottom:18px;padding:8px 10px;border-radius:12px;background:rgba(18,8,16,.78);backdrop-filter:blur(10px);border:1px solid var(--line);font-size:10px;color:var(--muted);pointer-events:none}.stageHint b{color:var(--text)}
 .hoverCard{position:fixed;z-index:50;display:none;min-width:180px;max-width:250px;padding:10px 11px;border-radius:13px;background:rgba(20,10,19,.94);border:1px solid rgba(250,220,213,.18);box-shadow:0 16px 50px rgba(0,0,0,.35);pointer-events:none}.hoverCard .title{font-weight:800;font-size:12px}.hoverCard .meta{margin-top:4px;color:var(--muted);font-size:10px}.hoverCard .badge{display:inline-flex;margin-top:7px;padding:4px 7px;border-radius:999px;background:rgba(250,220,213,.07);font-size:10px}
 .dragGhost{position:absolute;pointer-events:none;display:none;z-index:12;padding:6px 8px;border-radius:10px;font-size:10px;background:rgba(18,8,16,.88);border:1px solid var(--line)}
@@ -104,12 +107,12 @@ button{border:0;border-radius:12px;padding:9px 11px;color:white;font-weight:800;
       <button id="cancelCalibration" class="ghost" style="display:none">Cancel</button>
       <div class="spacer"></div>
       <button id="toggleGrid" class="ghost">Grid</button>
-      <div class="zoomCtl"><button id="zoomOut" class="ghost">−</button><input id="zoomRange" type="range" min="60" max="220" value="100"><button id="zoomIn" class="ghost">+</button><span id="zoomText" class="zoomText">100%</span><button id="zoomFit" class="ghost">Fit</button></div>
+      <div class="zoomReadout"><span>Wheel zoom</span><span id="zoomText" class="zoomText">100%</span></div>
     </div>
 
     <section class="previewStage" id="previewStage">
       <div class="viewport" id="viewport"><div class="canvasWrap"><canvas id="previewCanvas" width="1280" height="900"></canvas></div></div>
-      <div class="stageHint"><b>Tip:</b> hover building/wall untuk detail • drag building untuk memindahkan • Ctrl + wheel untuk zoom</div>
+      <div class="stageHint"><b>Tip:</b> hover untuk detail • drag building untuk pindah • wheel untuk zoom • double click untuk reset zoom</div>
       <div id="dragGhost" class="dragGhost"></div>
     </section>
   </main>
@@ -269,7 +272,7 @@ function villageWallLevel(){const walls=parsedVillage?.raw?.buildings?.filter(b=
 function drawHomeVillageFallback(W,H){const sky=ctx.createLinearGradient(0,0,0,H);sky.addColorStop(0,'#5cc7ef');sky.addColorStop(.48,'#95dff0');sky.addColorStop(.49,'#3a88a7');sky.addColorStop(1,'#164f6c');ctx.fillStyle=sky;ctx.fillRect(0,0,W,H);ctx.fillStyle='rgba(255,255,255,.22)';for(let i=0;i<9;i++){ctx.beginPath();ctx.arc(70+i*157,90+(i%3)*36,35+(i%2)*22,0,Math.PI*2);ctx.fill()}ctx.fillStyle='#2f6d32';ctx.beginPath();ctx.moveTo(W/2,70);ctx.lineTo(W-70,H/2);ctx.lineTo(W/2,H-28);ctx.lineTo(70,H/2);ctx.closePath();ctx.fill();ctx.strokeStyle='#174b27';ctx.lineWidth=22;ctx.stroke();ctx.strokeStyle='#72b94b';ctx.lineWidth=13;ctx.stroke()}
 function drawContainedImage(img,W,H){const scale=Math.min(W/img.naturalWidth,H/img.naturalHeight),w=img.naturalWidth*scale,h=img.naturalHeight*scale,x=(W-w)/2,y=(H-h)/2;ctx.drawImage(img,x,y,w,h);return{x,y,w,h}}
 function drawImageAtFrame(img,frame){ctx.drawImage(img,frame.x,frame.y,frame.w,frame.h);return{x:frame.x,y:frame.y,w:frame.w,h:frame.h}}
-function drawCalibratedImage(img,W,H,grid){const base=Math.min(W/img.naturalWidth,H/img.naturalHeight),xs=[grid.top[0],grid.right[0],grid.bottom[0],grid.left[0]],ys=[grid.top[1],grid.right[1],grid.bottom[1],grid.left[1]],gridW=(Math.max(...xs)-Math.min(...xs))*img.naturalWidth*base,gridH=(Math.max(...ys)-Math.min(...ys))*img.naturalHeight*base,focus=Math.max(1,Math.min(2.8,Math.min(W*.72/Math.max(1,gridW),H*.72/Math.max(1,gridH)))),w=img.naturalWidth*base*focus,h=img.naturalHeight*base*focus,cx=(Math.min(...xs)+Math.max(...xs))/2,cy=(Math.min(...ys)+Math.max(...ys))/2,x=W/2-cx*w,y=H/2-cy*h;ctx.drawImage(img,x,y,w,h);return{x,y,w,h}}
+function drawCalibratedImage(img,W,H,grid){ctx.drawImage(img,0,0,W,H);return{x:0,y:0,w:W,h:H}}
 function drawSceneryBackground(){const W=canvas.width,H=canvas.height,kind=$('scenerySelect').value,key=currentSceneryKey(),grid=effectiveGridForSelectedScenery();sceneryFrame=null;ctx.fillStyle='#102c3a';ctx.fillRect(0,0,W,H);if(kind==='custom'&&customScenery){const frame=calibrationState?.key===key&&calibrationState.frame?drawImageAtFrame(customScenery,calibrationState.frame):drawContainedImage(customScenery,W,H);sceneryFrame={...frame,grid};return}if(kind==='sakura'&&sceneryReady){const frame=calibrationState?.key===key&&calibrationState.frame?drawImageAtFrame(sceneryImage,calibrationState.frame):drawContainedImage(sceneryImage,W,H);ctx.fillStyle='rgba(24,10,20,.18)';ctx.fillRect(0,0,W,H);sceneryFrame={...frame,grid};return}const info=window.GameAssetPack?.sceneryInfo(kind),image=window.GameAssetPack?.scenery(kind);if(info&&image){const frame=calibrationState?.key===key&&calibrationState.frame?drawImageAtFrame(image,calibrationState.frame):drawCalibratedImage(image,W,H,grid);sceneryFrame={...frame,grid};return}drawHomeVillageFallback(W,H)}
 function drawIsoWall(w,m){const sprite=window.GameAssetPack?.wall(villageWallLevel());const c=isoPoint(m,w.x+.5,w.y+.5);if(sprite){const size=m.tw*1.65;ctx.drawImage(sprite,c.x-size/2,c.y-size*.72,size,size);return}drawIsoTile(m,w.x,w.y,'#8b795f',1);const top=isoPoint(m,w.x+.5,w.y+.5);ctx.fillStyle='#d9c49c';ctx.beginPath();ctx.ellipse(top.x,top.y-4,m.tw*.34,m.th*.42,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#6d5a43';ctx.stroke()}
 function drawScenery(){ctx.clearRect(0,0,canvas.width,canvas.height);drawSceneryBackground();const m=isoMetrics();if(showGrid)for(let y=0;y<m.gh;y++)for(let x=0;x<m.gw;x++)drawIsoTile(m,x,y,'rgba(255,255,255,.025)',.20);if(current?.walls){const arr=current.walls.slice().sort((a,b)=>(a.x+a.y)-(b.x+b.y));for(const w of arr)drawIsoWall(w,m)}if(current?.buildings){const list=current.buildings.map((b,i)=>({...b,_i:i})).sort((a,b)=>(a.x+a.y+a.w+a.h)-(b.x+b.y+b.w+b.h));for(const b of list)drawIsoBuilding(b,m)}if(dragState?.candidate&&previewMode==='scenery')drawIsoGhost(dragState,m);drawCalibrationOverlay()}
@@ -298,10 +301,59 @@ canvas.addEventListener('pointercancel',()=>{if(calibrationState){calibrationSta
 function updateSummary(){if(!current){$('pillSummary').textContent='Belum generate';$('pillWall').textContent='Wall: —';$('pillBuildings').textContent='Buildings: —';$('placedBuildingsStat').textContent='—';return}$('pillSummary').textContent=`TH${current.targetTownHall} • ${previewMode==='master'?'Master Plan':'Scenery'}`;$('pillWall').textContent=`Wall: ${current.generatedWallCount}/${current.targetWallCount}${current.generatedWallCount!==current.targetWallCount?' • closest':''}`;$('pillBuildings').textContent=`Buildings: ${current.buildings?.length||0}`;$('placedBuildingsStat').textContent=current.buildings?.length||0;updateOutput()}
 function updateOutput(){$('jsonOut').value=current?JSON.stringify(current,null,2):''}
 function populateSceneryOptions(){const select=$('scenerySelect');select.innerHTML='';for(const item of (window.SCENERY_CATALOG||[])){const option=document.createElement('option');option.value=item.id;option.textContent=item.name;select.appendChild(option)}const legacy=document.createElement('option');legacy.value='sakura';legacy.textContent='Sakura Dusk (legacy)';select.appendChild(legacy);const custom=document.createElement('option');custom.value='custom';custom.textContent='Custom Image…';select.appendChild(custom);select.value=(window.SCENERY_CATALOG||[]).some(item=>item.id==='classic')?'classic':select.options[0]?.value||'custom'}
-function setPreviewMode(mode){if(calibrationState&&mode!=='scenery')calibrationState=null;previewMode=mode;$('modeMaster').classList.toggle('active',mode==='master');$('modeScenery').classList.toggle('active',mode==='scenery');$('scenerySelect').style.display=mode==='scenery'?'':'none';$('sceneryFile').style.display=(mode==='scenery'&&$('scenerySelect').value==='custom')?'':'none';updateCalibrationControls();render()}
-function applyCanvasScale(){const vp=$('viewport');const availW=Math.max(200,vp.clientWidth-36),availH=Math.max(200,vp.clientHeight-36);const fit=Math.min(availW/canvas.width,availH/canvas.height);canvas.style.width=Math.round(canvas.width*fit*zoom)+'px';canvas.style.height=Math.round(canvas.height*fit*zoom)+'px'}
-function setZoom(value){zoom=Math.max(.6,Math.min(2.2,value));$('zoomRange').value=Math.round(zoom*100);$('zoomText').textContent=Math.round(zoom*100)+'%';applyCanvasScale()}
-function fitZoom(){setZoom(1);$('viewport').scrollTo({left:0,top:0,behavior:'smooth'})}
+function syncCanvasDimensions(){
+  if(previewMode==='scenery'){
+    const image=selectedSceneryImage();
+    if(image?.naturalWidth&&image?.naturalHeight){
+      const width=1280;
+      canvas.width=width;
+      canvas.height=Math.max(1,Math.round(width*image.naturalHeight/image.naturalWidth));
+      return;
+    }
+  }
+  canvas.width=1280;
+  canvas.height=900;
+}
+function setPreviewMode(mode){
+  if(calibrationState&&mode!=='scenery')calibrationState=null;
+  previewMode=mode;
+  $('modeMaster').classList.toggle('active',mode==='master');
+  $('modeScenery').classList.toggle('active',mode==='scenery');
+  $('scenerySelect').style.display=mode==='scenery'?'':'none';
+  $('sceneryFile').style.display=(mode==='scenery'&&$('scenerySelect').value==='custom')?'':'none';
+  $('previewStage').classList.toggle('sceneryMode',mode==='scenery');
+  syncCanvasDimensions();
+  zoom=1;
+  updateCalibrationControls();
+  render();
+  requestAnimationFrame(()=>{applyCanvasScale();$('viewport').scrollTo({left:0,top:0})});
+}
+function canvasBaseScale(){
+  const vp=$('viewport'),availW=Math.max(1,vp.clientWidth),availH=Math.max(1,vp.clientHeight);
+  return previewMode==='scenery'?availW/canvas.width:Math.min(availW/canvas.width,availH/canvas.height);
+}
+function applyCanvasScale(){
+  const fit=canvasBaseScale();
+  canvas.style.width=Math.round(canvas.width*fit*zoom)+'px';
+  canvas.style.height=Math.round(canvas.height*fit*zoom)+'px';
+  if($('zoomText'))$('zoomText').textContent=Math.round(zoom*100)+'%';
+}
+function setZoom(value){
+  const min=previewMode==='scenery'?1:.6;
+  zoom=Math.max(min,Math.min(4,value));
+  applyCanvasScale();
+}
+function zoomAtPointer(e){
+  const vp=$('viewport'),rect=vp.getBoundingClientRect(),oldZoom=zoom;
+  const localX=e.clientX-rect.left,localY=e.clientY-rect.top;
+  const contentX=vp.scrollLeft+localX,contentY=vp.scrollTop+localY;
+  const factor=Math.exp(-e.deltaY*0.0015);
+  setZoom(oldZoom*factor);
+  const ratio=zoom/oldZoom;
+  vp.scrollLeft=contentX*ratio-localX;
+  vp.scrollTop=contentY*ratio-localY;
+}
+function fitZoom(){setZoom(1);$('viewport').scrollTo({left:0,top:0})}
 function generateFull(){layoutRoll++;buildingRoll=0;const seed=$('seed').value.trim()||'YUSHIKA-LAYOUT-STUDIO';current=generateWalls(seed);generateBuildingsForCurrent();render()}
 function generateBuildingsOnly(){if(!current?.walls?.length){generateFull();return}generateBuildingsForCurrent();render()}
 
@@ -310,13 +362,13 @@ $('villageFile').addEventListener('change',async e=>{const f=e.target.files?.[0]
 $('loadExample').addEventListener('click',()=>{$('villageInput').value=JSON.stringify(EXAMPLE_VILLAGE_JSON,null,2);applyParsedVillage(parseVillageExportObject(EXAMPLE_VILLAGE_JSON));generateFull()});$('clearVillage').addEventListener('click',()=>{$('villageInput').value='';$('villageFile').value='';clearParsedVillage()});
 $('generateFull').addEventListener('click',generateFull);$('generateBuildingsOnly').addEventListener('click',generateBuildingsOnly);$('reroll').addEventListener('click',()=>{$('seed').value='LAYOUT-'+Math.random().toString(36).slice(2,10).toUpperCase();generateFull()});$('resetDefaults').addEventListener('click',()=>{$('seed').value='YUSHIKA-LAYOUT-STUDIO';$('gridW').value=44;$('gridH').value=44;$('targetTH').value=parsedVillage?.townHall||10;$('targetWalls').value=parsedVillage?.wallCount||275;$('minGap').value=1;$('margin').value=1;$('jitter').value=4;$('symmetry').value='loose';$('buildingDensity').value='all';generateFull()});
 $('modeMaster').addEventListener('click',()=>setPreviewMode('master'));$('modeScenery').addEventListener('click',()=>setPreviewMode('scenery'));$('toggleGrid').addEventListener('click',()=>{showGrid=!showGrid;$('toggleGrid').style.opacity=showGrid?'1':'.55';render()});
-$('zoomRange').addEventListener('input',e=>setZoom(+e.target.value/100));$('zoomOut').addEventListener('click',()=>setZoom(zoom-.1));$('zoomIn').addEventListener('click',()=>setZoom(zoom+.1));$('zoomFit').addEventListener('click',fitZoom);$('viewport').addEventListener('wheel',e=>{if(!e.ctrlKey)return;e.preventDefault();setZoom(zoom+(e.deltaY<0?.1:-.1))},{passive:false});window.addEventListener('resize',()=>applyCanvasScale());
-$('scenerySelect').addEventListener('change',()=>{$('sceneryFile').style.display=$('scenerySelect').value==='custom'?'':'none';updateCalibrationControls();render()});$('sceneryFile').addEventListener('change',e=>{const f=e.target.files?.[0];if(!f)return;const url=URL.createObjectURL(f),img=new Image();img.onload=()=>{customScenery=img;customSceneryKey=`custom:${f.name}:${img.naturalWidth}x${img.naturalHeight}`;URL.revokeObjectURL(url);render()};img.src=url});
+$('viewport').addEventListener('wheel',e=>{e.preventDefault();zoomAtPointer(e)},{passive:false});$('viewport').addEventListener('dblclick',e=>{if(e.target===canvas){fitZoom()}});window.addEventListener('resize',()=>applyCanvasScale());
+$('scenerySelect').addEventListener('change',()=>{$('sceneryFile').style.display=$('scenerySelect').value==='custom'?'':'none';updateCalibrationControls();if(previewMode==='scenery'){syncCanvasDimensions();zoom=1}render();requestAnimationFrame(()=>applyCanvasScale())});$('sceneryFile').addEventListener('change',e=>{const f=e.target.files?.[0];if(!f)return;const url=URL.createObjectURL(f),img=new Image();img.onload=()=>{customScenery=img;customSceneryKey=`custom:${f.name}:${img.naturalWidth}x${img.naturalHeight}`;URL.revokeObjectURL(url);if(previewMode==='scenery'){syncCanvasDimensions();zoom=1}render();requestAnimationFrame(()=>applyCanvasScale())};img.src=url});
 $('calibrateScenery').addEventListener('click',beginCalibration);$('saveCalibration').addEventListener('click',saveCalibration);$('resetCalibration').addEventListener('click',resetCalibration);$('cancelCalibration').addEventListener('click',cancelCalibration);$('exportCalibrations').addEventListener('click',exportCalibrations);
 $('useParsedWalls').addEventListener('change',()=>{if(parsedVillage?.wallCount&&$('useParsedWalls').value==='yes')$('targetWalls').value=parsedVillage.wallCount});$('copyJson').addEventListener('click',async()=>{if(!current)return;try{await navigator.clipboard.writeText(JSON.stringify(current,null,2));alert('JSON dicopy.')}catch{alert('Clipboard gagal.')}});$('downloadJson').addEventListener('click',()=>{if(!current)return;const blob=new Blob([JSON.stringify(current,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`village_layout_th${current.targetTownHall}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)});
 
 window.GameAssetPack?.onStatus(({loaded,missing,pending})=>{const el=$('assetPackStatus');if(!el)return;el.textContent=loaded?`Assets: ${loaded} loaded${pending?` • ${pending} loading`:''}`:`Asset pack: ${pending?'loading':'fallback'}`;el.classList.toggle('asset-ready',loaded>0);el.title=missing?`${missing} file aset belum tersedia; procedural fallback aktif.`:'Sprite lokal siap.'});
-window.addEventListener('gameassetload',()=>{if(previewMode==='scenery')drawCanvas()});
+window.addEventListener('gameassetload',()=>{if(previewMode==='scenery'){syncCanvasDimensions();drawCanvas();requestAnimationFrame(()=>applyCanvasScale())}});
 
 populateSceneryOptions();updateCalibrationControls();referenceComponents=decomposeComponents(REFERENCE_DATA);sceneryImage=new Image();sceneryImage.onload=()=>{sceneryReady=true;render()};sceneryImage.src=SAKURA_BG;clearParsedVillage();setZoom(1);generateFull();
 </script>
