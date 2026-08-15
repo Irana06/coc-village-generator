@@ -39,9 +39,9 @@ button{border:0;border-radius:12px;padding:9px 11px;color:white;font-weight:800;
 .projectTitle h2{margin:0;font-size:18px}.projectTitle p{margin:3px 0 0;color:var(--muted);font-size:11px}.topStats{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}.pill{padding:7px 10px;border-radius:999px;background:rgba(250,220,213,.05);border:1px solid var(--line);font-size:11px;white-space:nowrap}
 .previewToolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 10px;border-radius:18px;background:linear-gradient(180deg,rgba(45,34,47,.72),rgba(27,12,26,.78));border:1px solid var(--line);box-shadow:0 15px 40px rgba(0,0,0,.17)}
 .segment{display:flex;gap:3px;padding:3px;border-radius:13px;background:rgba(250,220,213,.055);border:1px solid rgba(250,220,213,.08)}.segment button{box-shadow:none;background:transparent;padding:7px 11px;color:var(--muted)}.segment button.active{background:linear-gradient(135deg,var(--mauve),var(--berry));color:white}.spacer{flex:1}
-.zoomReadout{display:flex;align-items:center;gap:7px;padding:0 4px;color:var(--muted);font-size:10px}.zoomText{min-width:42px;text-align:right;font-size:11px;color:var(--text);font-weight:800}
+.zoomControls{display:flex;align-items:center;gap:6px}.zoomReadout{display:flex;align-items:center;gap:7px;padding:0 4px;color:var(--muted);font-size:10px}.zoomText{min-width:42px;text-align:right;font-size:11px;color:var(--text);font-weight:800}.zoomButton{display:grid;place-items:center;min-width:38px;height:38px;padding:0 10px;line-height:1;font-size:18px;touch-action:manipulation}.zoomButton.zoomFit{font-size:10px}
 .previewStage{min-height:0;border-radius:0;background:#102c3a;border:0;box-shadow:none;overflow:hidden;position:relative}
-.viewport{position:absolute;inset:0;overflow:auto;padding:0;overscroll-behavior:contain;scrollbar-width:none;cursor:grab;touch-action:none;user-select:none}
+.viewport{position:absolute;inset:0;overflow:auto;padding:0;overscroll-behavior:contain;scrollbar-width:none;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 .viewport::-webkit-scrollbar{display:none}
 .viewport.isPanning,.viewport.isPanning canvas{cursor:grabbing!important}
 .canvasWrap{min-width:100%;min-height:100%;display:block;background:#102c3a}
@@ -51,7 +51,9 @@ button{border:0;border-radius:12px;padding:9px 11px;color:white;font-weight:800;
 .dragGhost{position:absolute;pointer-events:none;display:none;z-index:12;padding:6px 8px;border-radius:10px;font-size:10px;background:rgba(18,8,16,.88);border:1px solid var(--line)}
 .legendList,.moduleList{max-height:185px;overflow:auto;border:1px solid var(--line);border-radius:12px;background:rgba(250,220,213,.035);padding:5px}.legendItem,.listItem{padding:7px 8px;border-radius:10px;margin-bottom:5px;background:rgba(250,220,213,.035);border:1px solid rgba(250,220,213,.07)}.dot{width:10px;height:10px;border-radius:50%;display:inline-block}.legendChip{display:inline-flex;align-items:center;gap:7px}.small{font-size:10px;color:var(--muted)}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}.outputArea{display:none}
 ::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-thumb{background:rgba(250,220,213,.16);border-radius:999px}::-webkit-scrollbar-track{background:transparent}
-@media(max-width:980px){body{overflow:auto}.app{grid-template-columns:1fr;height:auto}.sidebar{height:auto}.workspace{height:900px}.topbar{align-items:flex-start;flex-direction:column}.topStats{justify-content:flex-start}}
+@media(max-width:980px){body{overflow:auto}.app{grid-template-columns:1fr;height:auto}.sidebar{height:auto}.workspace{height:100dvh;min-height:620px;padding:9px;gap:8px}.topbar{align-items:flex-start;flex-direction:column;padding:9px 11px}.topStats{justify-content:flex-start}.previewToolbar{gap:6px;padding:7px}.previewToolbar .spacer{display:none}.zoomControls{margin-left:auto}.stageHint{left:8px;right:8px;bottom:8px;width:max-content;max-width:calc(100% - 16px)}}
+@media(max-width:560px){.workspace{min-height:560px}.projectTitle p{display:none}.topStats{gap:4px}.pill{padding:5px 7px;font-size:10px}.previewToolbar .fixedSceneryLabel{display:none}.segment button{padding:7px 9px}.zoomGestureLabel{display:none}.zoomButton{min-width:40px;height:40px}.stageHint{padding:6px 8px;font-size:9px;line-height:1.35}}
+@media(pointer:coarse){.zoomButton{min-width:44px;height:44px}}
 </style>
 <link rel="stylesheet" href="assets/css/game-theme.css">
 </head>
@@ -111,12 +113,17 @@ button{border:0;border-radius:12px;padding:9px 11px;color:white;font-weight:800;
       <button id="cancelCalibration" class="ghost" style="display:none">Cancel</button>
       <div class="spacer"></div>
       <button id="toggleGrid" class="ghost">Grid</button>
-      <div class="zoomReadout"><span>Wheel zoom</span><span id="zoomText" class="zoomText">100%</span></div>
+      <div class="zoomControls" aria-label="Kontrol zoom preview">
+        <button id="zoomOut" class="ghost zoomButton" type="button" aria-label="Perkecil preview">−</button>
+        <div class="zoomReadout"><span class="zoomGestureLabel">Pinch / wheel</span><span id="zoomText" class="zoomText">100%</span></div>
+        <button id="zoomIn" class="ghost zoomButton" type="button" aria-label="Perbesar preview">+</button>
+        <button id="zoomReset" class="ghost zoomButton zoomFit" type="button" aria-label="Kembalikan preview ke ukuran pas">Fit</button>
+      </div>
     </div>
 
     <section class="previewStage" id="previewStage">
       <div class="viewport" id="viewport"><div class="canvasWrap"><canvas id="previewCanvas" width="1280" height="900"></canvas></div></div>
-      <div class="stageHint" id="stageHint"><b>Skeleton Kingdom:</b> grid buildable 44×44 • wheel untuk zoom • klik-tahan lalu geser untuk memindahkan view</div>
+      <div class="stageHint" id="stageHint"><b>Skeleton Kingdom:</b> grid buildable 44×44 • pinch / wheel untuk zoom • geser satu jari atau klik-tahan untuk memindahkan view</div>
       <div id="dragGhost" class="dragGhost"></div>
     </section>
   </main>
@@ -500,7 +507,7 @@ function setPreviewMode(mode){
   $('scenerySelect').style.display='none';
   $('sceneryFile').style.display='none';
   $('previewStage').classList.toggle('sceneryMode',mode==='scenery');
-  $('stageHint').innerHTML=mode==='scenery'?'<b>Skeleton Kingdom:</b> grid buildable 44×44 • wheel untuk zoom • klik-tahan lalu geser view':'<b>Tip:</b> drag area kosong untuk geser view • drag building untuk pindah • wheel untuk zoom';
+  $('stageHint').innerHTML=mode==='scenery'?'<b>Skeleton Kingdom:</b> grid buildable 44×44 • pinch / wheel untuk zoom • geser satu jari atau klik-tahan untuk memindahkan view':'<b>Tip:</b> pinch / wheel untuk zoom • geser area kosong untuk memindahkan view • drag building untuk pindah';
   syncCanvasDimensions();
   zoom=1;
   updateCalibrationControls();
@@ -522,40 +529,93 @@ function setZoom(value){
   zoom=Math.max(min,Math.min(4,value));
   applyCanvasScale();
 }
+function zoomAtViewportPoint(value,localX,localY){
+  const vp=$('viewport'),oldZoom=zoom;
+  const contentX=(vp.scrollLeft+localX)/oldZoom,contentY=(vp.scrollTop+localY)/oldZoom;
+  setZoom(value);
+  vp.scrollLeft=contentX*zoom-localX;
+  vp.scrollTop=contentY*zoom-localY;
+}
 function zoomAtPointer(e){
-  const vp=$('viewport'),rect=vp.getBoundingClientRect(),oldZoom=zoom;
-  const localX=e.clientX-rect.left,localY=e.clientY-rect.top;
-  const contentX=vp.scrollLeft+localX,contentY=vp.scrollTop+localY;
-  const factor=Math.exp(-e.deltaY*0.0015);
-  setZoom(oldZoom*factor);
-  const ratio=zoom/oldZoom;
-  vp.scrollLeft=contentX*ratio-localX;
-  vp.scrollTop=contentY*ratio-localY;
+  const vp=$('viewport'),rect=vp.getBoundingClientRect();
+  zoomAtViewportPoint(zoom*Math.exp(-e.deltaY*.0015),e.clientX-rect.left,e.clientY-rect.top);
+}
+function stepZoom(factor){
+  const vp=$('viewport');
+  zoomAtViewportPoint(zoom*factor,vp.clientWidth/2,vp.clientHeight/2);
 }
 function fitZoom(){setZoom(1);$('viewport').scrollTo({left:0,top:0})}
-let panState=null;
-function beginViewportPan(e){
-  if(e.button!==0||calibrationState||dragState)return;
+const viewportPointers=new Map();
+let viewportGesture=null;
+const pointerPosition=e=>({x:e.clientX,y:e.clientY});
+function beginSinglePointerPan(pointerId,point){
   const vp=$('viewport');
-  panState={pointerId:e.pointerId,startX:e.clientX,startY:e.clientY,scrollLeft:vp.scrollLeft,scrollTop:vp.scrollTop};
-  vp.setPointerCapture?.(e.pointerId);
+  viewportGesture={mode:'pan',pointerId,startX:point.x,startY:point.y,scrollLeft:vp.scrollLeft,scrollTop:vp.scrollTop};
+}
+function beginPinchZoom(){
+  if(viewportPointers.size<2)return;
+  const vp=$('viewport'),rect=vp.getBoundingClientRect(),[a,b]=[...viewportPointers.values()],midX=(a.x+b.x)/2,midY=(a.y+b.y)/2;
+  viewportGesture={
+    mode:'pinch',
+    startDistance:Math.max(1,Math.hypot(b.x-a.x,b.y-a.y)),
+    startZoom:zoom,
+    contentX:(vp.scrollLeft+midX-rect.left)/zoom,
+    contentY:(vp.scrollTop+midY-rect.top)/zoom
+  };
+}
+function beginViewportGesture(e){
+  if(calibrationState||dragState||(e.pointerType==='mouse'&&e.button!==0))return;
+  const vp=$('viewport');
+  viewportPointers.set(e.pointerId,pointerPosition(e));
+  try{vp.setPointerCapture?.(e.pointerId)}catch{}
+  if(viewportPointers.size===1)beginSinglePointerPan(e.pointerId,pointerPosition(e));
+  else beginPinchZoom();
   vp.classList.add('isPanning');
   $('hoverCard').style.display='none';
   e.preventDefault();
 }
-function moveViewportPan(e){
-  if(!panState||e.pointerId!==panState.pointerId)return;
+function moveViewportGesture(e){
+  if(!viewportPointers.has(e.pointerId))return;
   const vp=$('viewport');
-  vp.scrollLeft=panState.scrollLeft-(e.clientX-panState.startX);
-  vp.scrollTop=panState.scrollTop-(e.clientY-panState.startY);
+  viewportPointers.set(e.pointerId,pointerPosition(e));
+  if(viewportPointers.size>=2){
+    if(viewportGesture?.mode!=='pinch')beginPinchZoom();
+    const rect=vp.getBoundingClientRect(),[a,b]=[...viewportPointers.values()],midX=(a.x+b.x)/2,midY=(a.y+b.y)/2;
+    const distance=Math.max(1,Math.hypot(b.x-a.x,b.y-a.y));
+    setZoom(viewportGesture.startZoom*distance/viewportGesture.startDistance);
+    vp.scrollLeft=viewportGesture.contentX*zoom-(midX-rect.left);
+    vp.scrollTop=viewportGesture.contentY*zoom-(midY-rect.top);
+  }else if(viewportGesture?.mode==='pan'&&viewportGesture.pointerId===e.pointerId){
+    vp.scrollLeft=viewportGesture.scrollLeft-(e.clientX-viewportGesture.startX);
+    vp.scrollTop=viewportGesture.scrollTop-(e.clientY-viewportGesture.startY);
+  }
   e.preventDefault();
 }
-function endViewportPan(e){
-  if(!panState||e.pointerId!==panState.pointerId)return;
+function finishViewportGesture(e){
+  if(!viewportPointers.has(e.pointerId))return;
   const vp=$('viewport');
-  if(vp.hasPointerCapture?.(e.pointerId))vp.releasePointerCapture(e.pointerId);
-  panState=null;
-  vp.classList.remove('isPanning');
+  viewportPointers.delete(e.pointerId);
+  try{if(vp.hasPointerCapture?.(e.pointerId))vp.releasePointerCapture(e.pointerId)}catch{}
+  if(viewportPointers.size===1){
+    const [pointerId,point]=viewportPointers.entries().next().value;
+    beginSinglePointerPan(pointerId,point);
+  }else if(viewportPointers.size>=2)beginPinchZoom();
+  else{
+    viewportGesture=null;
+    vp.classList.remove('isPanning');
+  }
+  e.preventDefault();
+}
+function loseViewportPointer(e){
+  if(!viewportPointers.has(e.pointerId))return;
+  viewportPointers.delete(e.pointerId);
+  if(viewportPointers.size===1){
+    const [pointerId,point]=viewportPointers.entries().next().value;
+    beginSinglePointerPan(pointerId,point);
+  }else if(!viewportPointers.size){
+    viewportGesture=null;
+    $('viewport').classList.remove('isPanning');
+  }
 }
 function generateFull(){layoutRoll++;buildingRoll=0;const seed=$('seed').value.trim()||'YUSHIKA-LAYOUT-STUDIO';current=generateWalls(seed);generateBuildingsForCurrent();render()}
 function generateBuildingsOnly(){if(!current?.walls?.length){generateFull();return}generateBuildingsForCurrent();render()}
@@ -567,13 +627,30 @@ $('generateFull').addEventListener('click',generateFull);$('generateBuildingsOnl
 $('modeMaster').addEventListener('click',()=>setPreviewMode('master'));$('modeScenery').addEventListener('click',()=>setPreviewMode('scenery'));$('toggleGrid').addEventListener('click',()=>{showGrid=!showGrid;$('toggleGrid').style.opacity=showGrid?'1':'.55';render()});
 const viewport=$('viewport');
 viewport.addEventListener('wheel',e=>{e.preventDefault();zoomAtPointer(e)},{passive:false});
-viewport.addEventListener('pointerdown',beginViewportPan);
-viewport.addEventListener('pointermove',moveViewportPan);
-viewport.addEventListener('pointerup',endViewportPan);
-viewport.addEventListener('pointercancel',endViewportPan);
-viewport.addEventListener('lostpointercapture',e=>{if(panState?.pointerId===e.pointerId){panState=null;viewport.classList.remove('isPanning')}});
+viewport.addEventListener('pointerdown',beginViewportGesture);
+viewport.addEventListener('pointermove',moveViewportGesture);
+viewport.addEventListener('pointerup',finishViewportGesture);
+viewport.addEventListener('pointercancel',finishViewportGesture);
+viewport.addEventListener('lostpointercapture',loseViewportPointer);
 viewport.addEventListener('dblclick',e=>{if(e.target===canvas){fitZoom()}});
-window.addEventListener('resize',()=>applyCanvasScale());
+$('zoomOut').addEventListener('click',()=>stepZoom(1/1.25));
+$('zoomIn').addEventListener('click',()=>stepZoom(1.25));
+$('zoomReset').addEventListener('click',fitZoom);
+let viewportResizeFrame=0;
+function rescaleCanvasForViewport(){
+  const oldWidth=Math.max(1,canvas.offsetWidth),oldHeight=Math.max(1,canvas.offsetHeight);
+  const focusX=(viewport.scrollLeft+viewport.clientWidth/2)/oldWidth,focusY=(viewport.scrollTop+viewport.clientHeight/2)/oldHeight;
+  applyCanvasScale();
+  if(zoom===1){viewport.scrollTo({left:0,top:0});return}
+  viewport.scrollLeft=focusX*canvas.offsetWidth-viewport.clientWidth/2;
+  viewport.scrollTop=focusY*canvas.offsetHeight-viewport.clientHeight/2;
+}
+function scheduleViewportRescale(){
+  cancelAnimationFrame(viewportResizeFrame);
+  viewportResizeFrame=requestAnimationFrame(rescaleCanvasForViewport);
+}
+window.addEventListener('resize',scheduleViewportRescale);
+if('ResizeObserver'in window)new ResizeObserver(scheduleViewportRescale).observe(viewport);
 $('calibrateScenery').addEventListener('click',beginCalibration);$('saveCalibration').addEventListener('click',saveCalibration);$('resetCalibration').addEventListener('click',resetCalibration);$('cancelCalibration').addEventListener('click',cancelCalibration);$('exportCalibrations').addEventListener('click',exportCalibrations);
 $('useParsedWalls').addEventListener('change',()=>{if(parsedVillage?.wallCount&&$('useParsedWalls').value==='yes')$('targetWalls').value=parsedVillage.wallCount});$('copyJson').addEventListener('click',async()=>{if(!current)return;try{await navigator.clipboard.writeText(JSON.stringify(current,null,2));alert('JSON dicopy.')}catch{alert('Clipboard gagal.')}});$('downloadJson').addEventListener('click',()=>{if(!current)return;const blob=new Blob([JSON.stringify(current,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`village_layout_th${current.targetTownHall}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)});
 
